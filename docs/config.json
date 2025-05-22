@@ -2,10 +2,13 @@
     "metrics_scope": "org",
     "members":"org",
     "features":[
-        "issues","pull-requests"
+        "pull-requests"
     ],
     "excluded_members": [
+        "marcoriol","professor-asw"
+        
     ],
     "excluded_repos": [
+        "it12b-entrega3"
     ]
 }
