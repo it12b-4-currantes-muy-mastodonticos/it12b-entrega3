@@ -1,0 +1,39 @@
+name: Daily Metrics
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  
+jobs:
+  get_metrics:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages  
+
+      - name: Get metrics
+        id: get_metrics
+        run: |
+          cd docs
+          cd scripts
+          python metrics.py daily
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORG_TOKEN: ${{ secrets.ORG_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository}}
+          PARALLELISM: ${{ vars.PARALLELISM}}
+      - name: Committing results
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/historic_metrics.json
+          git commit -m "Updated historic_metrics.json" || exit 0
+          git push
+
