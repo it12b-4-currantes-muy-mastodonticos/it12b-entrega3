@@ -19,6 +19,7 @@ export default function IssuesIndexPage({ navigate }) {
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     type: [],
     severity: [],
@@ -107,11 +108,21 @@ export default function IssuesIndexPage({ navigate }) {
     }));
   };
 
+  // Calcular si hay filtros activos para mostrar un indicador en el botón
+  const hasActiveFilters = () => {
+    return (
+      filters.type.length > 0 ||
+      filters.severity.length > 0 ||
+      filters.priority.length > 0 ||
+      filters.status.length > 0
+    );
+  };
+
 return (
   <div className="container mx-auto px-4 py-8 bg-white">
     <h1 className="text-3xl font-bold mb-6 text-gray-900">Issues</h1>
 
-    {/* Filtros y búsqueda */}
+    {/* Barra de búsqueda y botones */}
     <div className="mb-6 bg-white p-4 rounded-lg shadow border border-gray-100">
       <div className="flex flex-wrap items-center gap-4 mb-4">
         <input
@@ -128,117 +139,131 @@ return (
         >
           Nueva Issue
         </button>
+
         <button
           className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
           onClick={() => setShowLoginModal(true)}
         >
           Iniciar Sesión
         </button>
+                <button
+          className={`flex items-center gap-2 px-4 py-2 rounded-md ${
+            showFilters ? "bg-yellow-500 text-white hover:bg-yellow-600" : "bg-gray-600 text-white hover:bg-gray-700"
+          }`}
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          {hasActiveFilters() && (
+            <span className="inline-block w-2 h-2 rounded-full bg-white"></span>
+          )}
+          Filtros
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Filtro por tipo */}
-        <div>
-          <h3 className="font-medium mb-2 text-gray-900">Tipo</h3>
-          <div className="max-h-32 overflow-y-auto">
-            {types.map((type) => (
-              <label key={type.id} className="flex items-center gap-2 mb-1">
-                <input
-                  type="checkbox"
-                  checked={filters.type.includes(type.id)}
-                  onChange={() => handleFilterChange("type", type.id)}
-                />
-                <span className="flex items-center gap-2 text-gray-800">
-                  <span
-                    className="inline-block w-3 h-3 rounded-full"
-                    style={{ backgroundColor: type.color }}
-                  ></span>
-                  {type.name}
-                </span>
-              </label>
-            ))}
+      {/* Filtros desplegables */}
+      {showFilters && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Filtro por tipo */}
+          <div>
+            <h3 className="font-medium mb-2 text-gray-900">Tipo</h3>
+            <div className="max-h-32 overflow-y-auto">
+              {types.map((type) => (
+                <label key={type.id} className="flex items-center gap-2 mb-1">
+                  <input
+                    type="checkbox"
+                    checked={filters.type.includes(type.id)}
+                    onChange={() => handleFilterChange("type", type.id)}
+                  />
+                  <span className="flex items-center gap-2 text-gray-800">
+                    <span
+                      className="inline-block w-3 h-3 rounded-full"
+                      style={{ backgroundColor: type.color }}
+                    ></span>
+                    {type.name}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Otros filtros mantienen la misma estructura pero con texto más oscuro */}
-        {/* Filtro por severidad */}
-        <div>
-          <h3 className="font-medium mb-2 text-gray-900">Severidad</h3>
-          <div className="max-h-32 overflow-y-auto">
-            {severities.map((severity) => (
-              <label
-                key={severity.id}
-                className="flex items-center gap-2 mb-1"
-              >
-                <input
-                  type="checkbox"
-                  checked={filters.severity.includes(severity.id)}
-                  onChange={() => handleFilterChange("severity", severity.id)}
-                />
-                <span className="flex items-center gap-2 text-gray-800">
-                  <span
-                    className="inline-block w-3 h-3 rounded-full"
-                    style={{ backgroundColor: severity.color }}
-                  ></span>
-                  {severity.name}
-                </span>
-              </label>
-            ))}
+          {/* Filtro por severidad */}
+          <div>
+            <h3 className="font-medium mb-2 text-gray-900">Severidad</h3>
+            <div className="max-h-32 overflow-y-auto">
+              {severities.map((severity) => (
+                <label
+                  key={severity.id}
+                  className="flex items-center gap-2 mb-1"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.severity.includes(severity.id)}
+                    onChange={() => handleFilterChange("severity", severity.id)}
+                  />
+                  <span className="flex items-center gap-2 text-gray-800">
+                    <span
+                      className="inline-block w-3 h-3 rounded-full"
+                      style={{ backgroundColor: severity.color }}
+                    ></span>
+                    {severity.name}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Filtro por prioridad */}
-        <div>
-          <h3 className="font-medium mb-2 text-gray-900">Prioridad</h3>
-          <div className="max-h-32 overflow-y-auto">
-            {priorities.map((priority) => (
-              <label
-                key={priority.id}
-                className="flex items-center gap-2 mb-1"
-              >
-                <input
-                  type="checkbox"
-                  checked={filters.priority.includes(priority.id)}
-                  onChange={() => handleFilterChange("priority", priority.id)}
-                />
-                <span className="flex items-center gap-2 text-gray-800">
-                  <span
-                    className="inline-block w-3 h-3 rounded-full"
-                    style={{ backgroundColor: priority.color }}
-                  ></span>
-                  {priority.name}
-                </span>
-              </label>
-            ))}
+          {/* Filtro por prioridad */}
+          <div>
+            <h3 className="font-medium mb-2 text-gray-900">Prioridad</h3>
+            <div className="max-h-32 overflow-y-auto">
+              {priorities.map((priority) => (
+                <label
+                  key={priority.id}
+                  className="flex items-center gap-2 mb-1"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.priority.includes(priority.id)}
+                    onChange={() => handleFilterChange("priority", priority.id)}
+                  />
+                  <span className="flex items-center gap-2 text-gray-800">
+                    <span
+                      className="inline-block w-3 h-3 rounded-full"
+                      style={{ backgroundColor: priority.color }}
+                    ></span>
+                    {priority.name}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Filtro por estado */}
-        <div>
-          <h3 className="font-medium mb-2 text-gray-900">Estado</h3>
-          <div className="max-h-32 overflow-y-auto">
-            {statuses.map((status) => (
-              <label key={status.id} className="flex items-center gap-2 mb-1">
-                <input
-                  type="checkbox"
-                  checked={filters.status.includes(status.id)}
-                  onChange={() => handleFilterChange("status", status.id)}
-                />
-                <span className="flex items-center gap-2 text-gray-800">
-                  <span
-                    className="inline-block w-3 h-3 rounded-full"
-                    style={{ backgroundColor: status.color }}
-                  ></span>
-                  {status.name}
-                </span>
-              </label>
-            ))}
+          {/* Filtro por estado */}
+          <div>
+            <h3 className="font-medium mb-2 text-gray-900">Estado</h3>
+            <div className="max-h-32 overflow-y-auto">
+              {statuses.map((status) => (
+                <label key={status.id} className="flex items-center gap-2 mb-1">
+                  <input
+                    type="checkbox"
+                    checked={filters.status.includes(status.id)}
+                    onChange={() => handleFilterChange("status", status.id)}
+                  />
+                  <span className="flex items-center gap-2 text-gray-800">
+                    <span
+                      className="inline-block w-3 h-3 rounded-full"
+                      style={{ backgroundColor: status.color }}
+                    ></span>
+                    {status.name}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
 
-    {/* Tabla de issues */}
+    {/* Tabla de issues - sin cambios */}
     <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
       {loading ? (
         <div className="p-8 text-center text-gray-900">Cargando issues...</div>
@@ -345,43 +370,43 @@ return (
         </table>
       )}
     </div>
-      {/* Modal de login */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLogin={(user) => {
-          setCurrentUser(user);
-          // Guardar el usuario seleccionado (pero no su token, que viene del .env)
-          localStorage.setItem("currentUser", JSON.stringify(user));
-        }}
-      />
+    
+    {/* Modal de login */}
+    <LoginModal
+      isOpen={showLoginModal}
+      onClose={() => setShowLoginModal(false)}
+      onLogin={(user) => {
+        setCurrentUser(user);
+        localStorage.setItem("currentUser", JSON.stringify(user));
+      }}
+    />
 
-      {/* Opcional: Mostrar el usuario actual */}
-      {currentUser && (
-        <div className="fixed bottom-4 right-4 bg-white p-3 rounded-lg shadow-md flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden">
-            {currentUser.avatar && (
-              <img
-                src={currentUser.avatar_url}
-                alt={currentUser.name}
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          <div>
-            <div className="font-medium text-gray-900">{currentUser.name}</div>
-            <button
-              className="text-red-600 text-sm hover:text-red-800 font-medium"
-              onClick={() => {
-                setCurrentUser(null);
-                localStorage.removeItem("currentUser");
-              }}
-            >
-              Cerrar sesión
-            </button>
-          </div>
+    {/* Opcional: Mostrar el usuario actual */}
+    {currentUser && (
+      <div className="fixed bottom-4 right-4 bg-white p-3 rounded-lg shadow-md flex items-center gap-2">
+        <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden">
+          {currentUser.avatar && (
+            <img
+              src={currentUser.avatar_url}
+              alt={currentUser.name}
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
-      )}
-    </div>
+        <div>
+          <div className="font-medium text-gray-900">{currentUser.name}</div>
+          <button
+            className="text-red-600 text-sm hover:text-red-800 font-medium"
+            onClick={() => {
+              setCurrentUser(null);
+              localStorage.removeItem("currentUser");
+            }}
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
   );
 }
