@@ -7,10 +7,14 @@ import {
   getSeverities,
   getPriorities,
   getStatuses,
+  getUsers,
 } from "../apiCall";
 import LoginModal from "../components/loginModal";
 
 export default function IssuesIndexPage({ navigate }) {
+  const [users, setUsers] = useState([]);
+  const [assignedTo, setAssignedTo] = useState([]);
+  const [createdBy, setCreatedBy] = useState([]);
   const [issues, setIssues] = useState([]);
   const [types, setTypes] = useState([]);
   const [severities, setSeverities] = useState([]);
@@ -26,6 +30,8 @@ export default function IssuesIndexPage({ navigate }) {
     priority: [],
     status: [],
     search: "",
+    assignedTo: [],
+    createdBy: [],
   });
   const [sort, setSort] = useState({
     field: "updated_at",
@@ -38,18 +44,22 @@ export default function IssuesIndexPage({ navigate }) {
         setLoading(true);
 
         // Cargar los datos de filtrado
-        const [typesData, severitiesData, prioritiesData, statusesData] =
+        const [typesData, severitiesData, prioritiesData, statusesData, assignedToData, createdByData] =
           await Promise.all([
             getTypes(),
             getSeverities(),
             getPriorities(),
             getStatuses(),
+            getUsers(),
+            getUsers(),
           ]);
 
         setTypes(typesData);
         setSeverities(severitiesData);
         setPriorities(prioritiesData);
         setStatuses(statusesData);
+        setAssignedTo(assignedToData);
+        setCreatedBy(createdByData);
 
         // Construir los parámetros de consulta
         const params = {
@@ -66,6 +76,11 @@ export default function IssuesIndexPage({ navigate }) {
           params["filter_priority[]"] = filters.priority;
         if (filters.status.length > 0)
           params["filter_status[]"] = filters.status;
+        if (filters.assignedTo.length > 0)
+          params["filter_assignee[]"] = filters.assignedTo;
+        if (filters.createdBy.length > 0)
+          params["filter_creator[]"] = filters.createdBy;
+
 
         // Obtener las issues con los filtros aplicados
         const issuesData = await getIssues(params);
@@ -114,7 +129,9 @@ export default function IssuesIndexPage({ navigate }) {
       filters.type.length > 0 ||
       filters.severity.length > 0 ||
       filters.priority.length > 0 ||
-      filters.status.length > 0
+      filters.status.length > 0 ||
+      filters.assignedTo.length > 0 ||
+      filters.createdBy.length > 0
     );
   };
 
@@ -161,7 +178,7 @@ return (
 
       {/* Filtros desplegables */}
       {showFilters && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {/* Filtro por tipo */}
           <div>
             <h3 className="font-medium mb-2 text-gray-900">Tipo</h3>
@@ -254,6 +271,62 @@ return (
                       style={{ backgroundColor: status.color }}
                     ></span>
                     {status.name}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Filtro por asignado a */}
+          <div>
+            <h3 className="font-medium mb-2 text-gray-900">Asignado a</h3>
+            <div className="max-h-32 overflow-y-auto">
+              {assignedTo.map((user) => (
+                <label key={user.id} className="flex items-center gap-2 mb-1">
+                  <input
+                    type="checkbox"
+                    checked={filters.assignedTo.includes(user.id)}
+                    onChange={() => handleFilterChange("assignedTo", user.id)}
+                  />
+                  <span className="flex items-center gap-2 text-gray-800">
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name}
+                        className="w-5 h-5 rounded-full"
+                      />
+                    ) : (
+                      <span className="inline-block w-5 h-5 rounded-full bg-gray-300"></span>
+                    )}
+                    {user.name || user.username}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Filtro por creado por */}
+          <div>
+            <h3 className="font-medium mb-2 text-gray-900">Creado por</h3>
+            <div className="max-h-32 overflow-y-auto">
+              {createdBy.map((user) => (
+                <label key={user.id} className="flex items-center gap-2 mb-1">
+                  <input
+                    type="checkbox"
+                    checked={filters.createdBy.includes(user.id)}
+                    onChange={() => handleFilterChange("createdBy", user.id)}
+                  />
+                  <span className="flex items-center gap-2 text-gray-800">
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name}
+                        className="w-5 h-5 rounded-full"
+                      />
+                    ) : (
+                      <span className="inline-block w-5 h-5 rounded-full bg-gray-300"></span>
+                    )}
+                    {user.name || user.username}
                   </span>
                 </label>
               ))}
