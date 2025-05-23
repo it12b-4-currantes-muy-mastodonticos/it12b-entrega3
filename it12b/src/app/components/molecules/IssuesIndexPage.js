@@ -7,8 +7,8 @@ import {
   getSeverities,
   getPriorities,
   getStatuses,
-} from "../apiCall";
-import LoginModal from "../components/loginModal";
+} from "../../apiCall";
+import LoginModal from "../organisms/loginModal";
 
 export default function IssuesIndexPage({ navigate }) {
   const [issues, setIssues] = useState([]);

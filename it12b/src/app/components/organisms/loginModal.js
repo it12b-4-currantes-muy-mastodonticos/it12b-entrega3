@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getUsers } from "../apiCall";
+import { getUsers } from "../../apiCall";
 
 export default function LoginModal({ isOpen, onClose, onLogin }) {
   const [users, setUsers] = useState([]);
