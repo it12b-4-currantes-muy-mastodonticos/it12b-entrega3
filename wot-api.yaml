@@ -1,0 +1,3358 @@
+openapi: 3.0.0
+info:
+  title: Taiga Issues API
+  version: 1.0.0
+  description: API for accessing user data using API tokens
+
+servers:
+  - url: http://guarded-thicket-57238-b0a5a41acd38.herokuapp.com
+  - url: http://3.83.18.172:8080
+
+security:
+  - api_token: []
+
+tags:
+  - name: Issues
+    description: Operaciones relacionadas con los issues
+  - name: Users
+    description: Operaciones relacionadas con los usuarios
+  - name: Comments
+    description: Operaciones relacionadas con los comentarios de las issues
+  - name: Watchers
+    description: Operaciones relacionadas con los watchers
+  - name: Types
+    description: Operaciones relcionadas con los tipos
+  - name: Severities
+    description: Operaciones relacionadas con las severities
+  - name: Priorities
+    description: Operaciones relacionadas con las priorities
+  - name: Statuses
+    description: Operaciones relacionadas con los statuses
+
+
+
+paths:
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Obtener lista de usuarios
+      description: Retorna una lista de todos los usuarios disponibles
+      responses:
+        '200':
+          description: Lista de usuarios obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    username:
+                      type: string
+                    email:
+                      type: string
+                    bio:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                    url:
+                      type: string
+                    avatar_url:
+                      type: string
+        '500':
+          description: Internal server error
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Obtener usuario por ID
+      description: Retorna la información del usuario específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario a recuperar
+          schema:
+            type: integer
+            example: 2
+      responses:
+        '200':
+          description: Usuario encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  bio:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  url:
+                    type: string
+                  avatar_url:
+                    type: string
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - Users
+      summary: Actualizar un usuario existente
+      description: Actualiza el usuario indicado por el ID (requiere autenticación)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario a actualizar
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                user[name]:
+                  type: string
+                user[username]:
+                  type: string
+                user[email]:
+                  type: string
+                  format: email
+                user[bio]:
+                  type: string
+                user[avatar]:
+                  type: string
+                  format: binary
+                  example: ""
+      responses:
+        '200':
+          description: Usuario actualizado con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  bio:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  url:
+                    type: string
+                    format: uri
+                  avatar_url:
+                    type: string
+                    nullable: true
+              example:
+                id: 2
+                name: Juan Pérez
+                username: juanperez
+                email: juan.perez.@estudiantat.upc.edu
+                bio: Developer and student at UPC
+                created_at: "2025-05-14T20:03:29.768Z"
+                updated_at: "2025-05-14T20:11:44.633Z"
+                url: https://miapp.com/users/2.json
+                avatar_url: null
+        '400':
+          description:   Solicitud incorrecta (JSON body malformado o parámetro incorrecto o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+              example:
+                email:
+                  - "is invalid"
+                username:
+                  - "can't be blank"
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '403':
+          description: Privilegio no concedido (token no corresponde con usuario a editar)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Forbidden (token does not match the user to edit)
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User not found
+        '409':
+          description: Conflicto por nombre de usuario ya en uso por otro usuario
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Username already exists
+        '500':
+          description: Error interno del servidor
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Obtener información del usuario autenticado
+      description: Retorna la información del usuario asociado al token de autenticación
+      security:
+        - api_token: []
+      responses:
+        '200':
+          description: Usuario autenticado obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  bio:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  url:
+                    type: string
+                  avatar_url:
+                    type: string
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '500':
+          description: Internal server error
+
+  /users/{id}/watchers:
+    get:
+      tags:
+        - Watchers
+      summary: Obtener issues vigiladas por un usuario
+      description: Retorna la lista de issues que un usuario está observando actualmente, con soporte para ordenamiento y búsqueda
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario del que se obtendrán las issues vigiladas
+          schema:
+            type: integer
+            example: 1
+        - name: direction
+          in: query
+          required: false
+          description: Dirección del ordenamiento (`asc` o `desc`)
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: sort
+          in: query
+          required: false
+          description: Campo por el cual ordenar los resultados
+          schema:
+            type: string
+            enum: [priority, severity, issue, updated_at, status, type]
+            default: priority
+      responses:
+        '200':
+          description: Lista de issues vigiladas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    issue_type:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                    severity:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                    priority:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                    status:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        color:
+                          type: string
+                        open:
+                          type: boolean
+                    updated_at:
+                      type: string
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User not found
+        '500':
+          description: Internal server error
+  /users/{id}/comments:
+    get:
+      tags:
+        - Comments
+      summary: Obtener comentarios realizados por un usuario
+      description: Retorna la lista de comentarios hechos por un usuario, con soporte para búsqueda y ordenamiento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario cuyos comentarios se desean obtener
+          schema:
+            type: integer
+            example: 1
+
+      responses:
+        '200':
+          description: Lista de comentarios obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: ID del comentario
+                    content:
+                      type: string
+                      description: Contenido del comentario
+                    created_at:
+                      type: string
+                      format: date-time
+                      description: Fecha de creación
+                    issue:
+                      type: object
+                      description: Issue relacionada con el comentario
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        url:
+                          type: string
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User not found
+        '500':
+          description: Internal server error
+
+  /users/{id}/assigned_issues:
+    get:
+      tags:
+        - Users
+      summary: Obtener issues asignadas a un usuario
+      description: Retorna la lista de issues actualmente asignadas a un usuario, con soporte de búsqueda y ordenamiento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario del cual se obtendrán las issues asignadas
+          schema:
+            type: integer
+            example: 1
+        - name: direction
+          in: query
+          required: false
+          description: Dirección del ordenamiento (`asc` o `desc`)
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: sort
+          in: query
+          required: false
+          description: Campo por el cual ordenar los resultados
+          schema:
+            type: string
+            enum: [priority, severity, issue, updated_at, status, type]
+            default: updated_at
+      responses:
+        '200':
+          description: Lista de issues asignadas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    issue_type:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                        updated_at:
+                          type: string
+                    priority:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                        updated_at:
+                          type: string
+                    severity:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                        updated_at:
+                          type: string
+                    status:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                        updated_at:
+                          type: string
+                    updated_at:
+                      type: string
+                      format: date-time
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '500':
+          description: Internal server error
+
+
+
+  /issues:
+    get:
+      tags:
+        - Issues
+      summary: Lista de issues (ordenados)
+      description: Retorna una lista de issues con opciones de ordenamiento
+      parameters:
+        - name: direction
+          in: query
+          required: false
+          description: Dirección del ordenamiento (`asc` o `desc`)
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: sort
+          in: query
+          required: false
+          description: Campo por el cual ordenar los resultados
+          schema:
+            type: string
+            enum: [priority, severity, issue, updated_at, status, assigned_to_id, type]
+            default: priority
+        - name: search
+          in: query
+          required: false
+          description: Término de búsqueda por título o descripción del issue
+          schema:
+            type: string
+        - name: filter_type[]
+          in: query
+          required: false
+          description: IDs del type que se quieren aplicar en el filtro
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: filter_severity[]
+          in: query
+          required: false
+          description: IDs de la severity que se quieren aplicar en el filtro
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: filter_priority[]
+          in: query
+          required: false
+          description: IDs de la priority que se quieren aplicar en el filtro
+          schema:
+            type: array
+            items:
+              type: integer
+          style: form
+          explode: true
+        - name: filter_status[]
+          in: query
+          required: false
+          description: IDs del state que se quieren aplicar en el filtro
+          schema:
+            type: array
+            items:
+              type: integer
+          style: form
+          explode: true
+        - name: filter_creator[]
+          in: query
+          required: false
+          description: IDs del user creador que se quieren aplicar en el filtro
+          schema:
+            type: array
+            items:
+              type: integer
+          style: form
+          explode: true
+        - name: filter_assignee[]
+          in: query
+          required: false
+          description: IDs del user asignado que se quieren aplicar en el filtro
+          schema:
+            type: array
+            items:
+              type: integer
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: Lista de issues ordenada exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    status:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        color:
+                          type: string
+                    issue_type:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                    severity:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                    priority:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        color:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                    user_id:
+                      type: integer
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                    blocked:
+                      type: boolean
+                    description:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        body:
+                          type: string
+                        record_type:
+                          type: string
+                        record_id:
+                          type: integer
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                    due_date:
+                      type: string
+                      nullable: true
+                      format: date
+                    assigned_to_id:
+                      type: integer
+                    issue_type_id:
+                      type: integer
+                    priority_id:
+                      type: integer
+                    status_id:
+                      type: integer
+                    severity_id:
+                      type: integer
+                    due_date_reason:
+                      type: string
+                      nullable: true
+                    attachments:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          blob_id:
+                            type: integer
+                          created_at:
+                            type: string
+                            format: date-time
+                          filename:
+                            type: string
+                          content_type:
+                            type: string
+                          byte_size:
+                            type: integer
+                          issue_id:
+                            type: integer
+                          url:
+                            type: string
+                            format: url
+        '500':
+          description: Error interno del servidor
+        '404':
+          description: Id de un filtro es incorrecto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid filter_type
+
+    post:
+      tags:
+        - Issues
+      summary: Crear un nuevo issue
+      description: Crea un nuevo issue en el sistema (requiere autenticación)
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                issue[title]:
+                  type: string
+                issue[description]:
+                  type: string
+                issue[assigned_to_id]:
+                  type: integer
+                issue[due_date]:
+                  type: string
+                  format: date
+                issue[due_date_reason]:
+                  type: string
+                issue[priority_id]:
+                  type: integer
+                issue[severity_id]:
+                  type: integer
+                issue[status_id]:
+                  type: integer
+                issue[issue_type_id]:
+                  type: integer
+                issue[attachments][]:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                    example: ""
+              required:
+                - issue[title]
+
+      responses:
+        '201':
+          description: Issue creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  status:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      color:
+                        type: string
+                  issue_type:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      color:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  severity:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      color:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  priority:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      color:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  user_id:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  blocked:
+                    type: boolean
+                  description:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      body:
+                        type: string
+                      record_type:
+                        type: string
+                      record_id:
+                        type: integer
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  due_date:
+                    type: string
+                    nullable: true
+                    format: date
+                  assigned_to_id:
+                    type: integer
+                  issue_type_id:
+                    type: integer
+                  priority_id:
+                    type: integer
+                  status_id:
+                    type: integer
+                  severity_id:
+                    type: integer
+                  due_date_reason:
+                    type: string
+                    nullable: true
+                  attachments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        blob_id:
+                          type: integer
+                        created_at:
+                          type: string
+                          format: date-time
+                        filename:
+                          type: string
+                        content_type:
+                          type: string
+                        byte_size:
+                          type: integer
+                        issue_id:
+                          type: integer
+                        url:
+                          type: string
+                          format: url
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Formato de fecha inválido. Usa el formato YYYY-MM-DD."
+        '404':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  error:
+                    - "ID de prioridad no encontrado. No se puede asignar una prioridad inexistente."
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '500':
+          description: Error interno del servidor
+
+  /issues/{id}:
+    get:
+      tags:
+        - Issues
+      summary: Obtener issue por ID
+      description: Retorna un issue específico por su ID (sin autenticación requerida)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del issue a recuperar
+          schema:
+            type: integer
+            example: 17
+      responses:
+        '200':
+          description: Issue encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  status:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      color:
+                        type: string
+                  issue_type:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      color:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  severity:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      color:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  priority:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      color:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  user_id:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  blocked:
+                    type: boolean
+                  description:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      body:
+                        type: string
+                      record_type:
+                        type: string
+                      record_id:
+                        type: integer
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  due_date:
+                    type: string
+                    nullable: true
+                    format: date
+                  assigned_to_id:
+                    type: integer
+                  issue_type_id:
+                    type: integer
+                  priority_id:
+                    type: integer
+                  status_id:
+                    type: integer
+                  severity_id:
+                    type: integer
+                  due_date_reason:
+                    type: string
+                    nullable: true
+                  attachments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        blob_id:
+                          type: integer
+                        created_at:
+                          type: string
+                          format: date-time
+                        filename:
+                          type: string
+                        content_type:
+                          type: string
+                        byte_size:
+                          type: integer
+                        issue_id:
+                          type: integer
+                        url:
+                          type: string
+                          format: url
+        '404':
+          description: Issue no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Issue not found
+        '500':
+          description: Error interno del servidor
+
+    put:
+      tags:
+        - Issues
+      summary: Actualizar un issue existente
+      description: Actualiza un issue específico por su ID (requiere autenticación)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del issue a actualizar
+          schema:
+            type: integer
+            example: 17
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                issue[title]:
+                  type: string
+                issue[description]:
+                  type: string
+                issue[assigned_to_id]:
+                  type: integer
+                issue[due_date]:
+                  type: string
+                  format: date
+                issue[due_date_reason]:
+                  type: string
+                issue[priority_id]:
+                  type: integer
+                issue[severity_id]:
+                  type: integer
+                issue[status_id]:
+                  type: integer
+                issue[issue_type_id]:
+                  type: integer
+                issue[attachments][]:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                    example: ""
+      responses:
+        '200':
+          description: Issue actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  status:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      color:
+                        type: string
+                  issue_type:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      color:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  severity:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      color:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  priority:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      color:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  user_id:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  blocked:
+                    type: boolean
+                  description:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      body:
+                        type: string
+                      record_type:
+                        type: string
+                      record_id:
+                        type: integer
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                  due_date:
+                    type: string
+                    nullable: true
+                    format: date
+                  assigned_to_id:
+                    type: integer
+                  issue_type_id:
+                    type: integer
+                  priority_id:
+                    type: integer
+                  status_id:
+                    type: integer
+                  severity_id:
+                    type: integer
+                  due_date_reason:
+                    type: string
+                    nullable: true
+                  attachments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        blob_id:
+                          type: integer
+                        created_at:
+                          type: string
+                          format: date-time
+                        filename:
+                          type: string
+                        content_type:
+                          type: string
+                        byte_size:
+                          type: integer
+                        issue_id:
+                          type: integer
+                        url:
+                          type: string
+                          format: url
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "param is missing or the value is empty or invalid: issue"
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '404':
+          description: Issue no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Issue not found
+        '500':
+          description: Error interno del servidor
+
+
+    delete:
+      tags:
+        - Issues
+      summary: Eliminar issue por ID
+      description: Elimina un issue específico identificado por su ID (requiere autenticación)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del issue a eliminar
+          schema:
+            type: integer
+            example: 17
+      security:
+        - api_token: []
+      responses:
+        '204':
+          description: Issue eliminado exitosamente (sin contenido)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '404':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Issue not found
+        '500':
+          description: Error interno del servidor
+
+  /issues/{id}/due_date:
+    delete:
+      tags:
+        - Issues
+      summary: Eliminar la fecha de vencimiento de un issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Due_date eliminada exitosamente.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: {
+                  success: true,
+                  message: Due date removed successfully
+                }
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '404':
+          description: Issue no encontrado.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: {
+                  "error": "Issue not found"
+                }
+        '500':
+          description: Error interno del servidor
+
+  /issues/{id}/attachments:
+    delete:
+      tags:
+        - Issues
+      summary: Eliminar un archivo adjunto de un issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: blob_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Archivo eliminado correctamente.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: {
+                          success: true,
+                          message: Attachment removed successfully
+                }
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '404':
+          description: Issue o archivo no encontrado.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: {
+                          error: Attachment not found
+                }
+        '500':
+          description: Error interno del servidor
+
+  /issues/bulk_create:
+    post:
+      tags:
+        - Issues
+      summary: Create multiple issues at once
+      description: |
+        Crea múltiples issues con una sola request, una por línia.
+        Todas las issues creadas tendrán los siguientes parámetros por defecto:
+        - Status: New
+        - Type: Bug
+        - Severity: Normal
+        - Priority: Normal
+
+        El usuario autenticado se establecerá como el creador y asignado a la issue.
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bulk_issues:
+                  type: string
+                  description: Text with one issue title per line
+              required:
+                - bulk_issues
+            examples:
+              bulkIssuesExample:
+                summary: "Example bulk issues"
+                value:
+                  bulk_issues: "Título Issue 1\n Título Issue 2 \n Título Issue 3"
+      responses:
+        '201':
+          description: Issues created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "3 issues created"
+                  issues:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        status:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                            color:
+                              type: string
+                        issue_type:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            color:
+                              type: string
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                        severity:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            color:
+                              type: string
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                        priority:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            color:
+                              type: string
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                        user_id:
+                          type: integer
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        blocked:
+                          type: boolean
+                        description:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            body:
+                              type: string
+                            record_type:
+                              type: string
+                            record_id:
+                              type: integer
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                        due_date:
+                          type: string
+                          nullable: true
+                          format: date
+                        assigned_to_id:
+                          type: integer
+                        issue_type_id:
+                          type: integer
+                        priority_id:
+                          type: integer
+                        status_id:
+                          type: integer
+                        severity_id:
+                          type: integer
+                        due_date_reason:
+                          type: string
+                          nullable: true
+                        attachments:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                              blob_id:
+                                type: integer
+                              created_at:
+                                type: string
+                                format: date-time
+                              filename:
+                                type: string
+                              content_type:
+                                type: string
+                              byte_size:
+                                type: integer
+                              issue_id:
+                                type: integer
+                              url:
+                                type: string
+                                format: url
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No issues were provided"
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '500':
+          description: Internal server error
+  /types:
+    get:
+      tags:
+        - Types
+      summary: Lista de types
+      description: Retorna todos los types disponibles (sin autenticación requerida)
+      responses:
+        '200':
+          description: Lista de types obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    color:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - Types
+      summary: Crear un nuevo tipo
+      description: Crea un nuevo tipo de issue (requiere autenticación)
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+              required:
+                - name
+                - color
+      responses:
+        '201':
+          description: Tipo creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  color:
+                    type: string
+                    example: "#FFFFFF"
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Color El formato de color es incorrecto(#RRGGBB)
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '500':
+          description: Error interno del servidor
+
+  /types/{id}:
+    get:
+      tags:
+        - Types
+      summary: Obtener tipo por ID
+      description: Retorna un tipo específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del tipo a recuperar
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Tipo encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '404':
+          description: Tipo no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Type not found
+        '500':
+          description: Error interno del servidor
+
+    put:
+      tags:
+        - Types
+      summary: Actualizar un tipo existente
+      description: Actualiza un tipo específico por su ID (requiere autenticación)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del tipo a actualizar
+          schema:
+            type: integer
+            example: 1
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+      responses:
+        '200':
+          description: Tipo actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  id:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '404':
+          description: Tipo no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Type not found
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Color El formato de color es incorrecto(#RRGGBB)
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      tags:
+        - Types
+      summary: Eliminar tipo por ID y reasignar issues a otro tipo
+      description: Elimina un tipo específico identificado por su ID, y si el tipo tiene issues asociadas, las reasigna a un nuevo tipo.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del tipo a eliminar
+          schema:
+            type: integer
+            example: 1
+        - name: new_type_id
+          in: query
+          required: false
+          description: ID del nuevo tipo al que se reasignarán las issues (si aplica)
+          schema:
+            type: integer
+            example: 2
+      security:
+        - api_token: []
+      responses:
+        '204':
+          description: Tipo eliminado exitosamente (sin contenido)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '404':
+          description: Tipo no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Type not found
+        '409':
+          description: Ultimo tipo existente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No se puede eliminar el único tipo existente
+        '400':
+          description: No se ha pasado el tipo y estaba asociado a un issue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No se puede eliminar este tipo porque está asociado a issues y no se proporcionó un nuevo tipo.
+        '500':
+          description: Error interno del servidor
+
+  /severities:
+    get:
+      tags:
+        - Severities
+      summary: Lista de severities
+      description: Retorna todas las severities disponibles (sin autenticación requerida)
+      responses:
+        '200':
+          description: Lista de severities obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    color:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+        '500':
+          description: Internal server error
+
+    post:
+      tags:
+        - Severities
+      summary: Crear una nueva severity
+      description: Crea una nueva severity de issue (requiere autenticación)
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+              required:
+                - name
+                - color
+      responses:
+        '201':
+          description: severity creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  color:
+                    type: string
+                    example: "#FF0000"
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Color El formato de color es incorrecto(#RRGGBB)
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '500':
+          description: Error interno del servidor
+
+  /severities/{id}:
+    get:
+      tags:
+        - Severities
+      summary: Obtener severity por ID
+      description: Retorna una severity específica por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la severity a recuperar
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: severity encontrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '404':
+          description: severity no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Severity not found
+        '500':
+          description: Error interno del servidor
+    put:
+      tags:
+        - Severities
+      summary: Actualizar una severity existente
+      description: Actualiza una severity específica por su ID (requiere autenticación)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la severity a actualizar
+          schema:
+            type: integer
+            example: 1
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+      responses:
+        '200':
+          description: severity actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  id:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '404':
+          description: Severidad no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Severity not found
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Color El formato de color es incorrecto(#RRGGBB)
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      tags:
+        - Severities
+      summary: Eliminar severidad por ID
+      description: >
+        Elimina una severidad específica identificada por su ID (requiere autenticación).
+        Si la severidad está asociada a issues, se puede pasar el parámetro `new_severity_id` para reasignar los issues antes de eliminarla.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la severidad a eliminar
+          schema:
+            type: integer
+            example: 1
+        - name: new_severity_id
+          in: query
+          required: false
+          description: ID de la severidad a la que se reasignarán los issues antes de eliminar
+          schema:
+            type: integer
+            example: 2
+      security:
+        - api_token: []
+      responses:
+        '204':
+          description: Severidad eliminada exitosamente (sin contenido)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '404':
+          description: Severidad no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Severity not found
+        '409':
+          description: Ultima severidad existente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No se puede eliminar la única severidad existente
+        '400':
+          description: No se ha pasado la severidad y estaba asociada a un issue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No se puede eliminar esta severidad porque está asociada a issues y no se proporcionó una nueva severidad.
+        '500':
+          description: Error interno del servidor
+
+  /priorities:
+    get:
+      tags:
+        - Priorities
+      summary: Lista de priorities
+      description: Retorna todas las prioridades disponibles (sin autenticación requerida)
+      responses:
+        '200':
+          description: Lista de prioridades obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    color:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+        '500':
+          description: Internal server error
+
+    post:
+      tags:
+        - Priorities
+      summary: Crear una nueva prioridad
+      description: Crea una nueva prioridad de issue (requiere autenticación)
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+              required:
+                - name
+                - color
+      responses:
+        '201':
+          description: Prioridad creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  color:
+                    type: string
+                    example: "#0000FF"
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Color El formato de color es incorrecto(#RRGGBB)
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '500':
+          description: Error interno del servidor
+
+  /priorities/{id}:
+    get:
+      tags:
+        - Priorities
+      summary: Obtener prioridad por ID
+      description: Retorna una prioridad específica por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la prioridad a recuperar
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Prioridad encontrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '404':
+          description: Prioridad no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Priority not found
+        '500':
+          description: Error interno del servidor
+
+    put:
+      tags:
+        - Priorities
+      summary: Actualizar una prioridad existente
+      description: Actualiza una prioridad específica por su ID (requiere autenticación)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la prioridad a actualizar
+          schema:
+            type: integer
+            example: 1
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+      responses:
+        '200':
+          description: Prioridad actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  id:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Color El formato de color es incorrecto(#RRGGBB)
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '404':
+          description: Prioridad no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Priority not found
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      tags:
+        - Priorities
+      summary: Eliminar prioridad por ID
+      description: >
+        Elimina una prioridad específica identificada por su ID (requiere autenticación).
+        Si la prioridad está asociada a issues, se puede pasar el parámetro `new_priority_id` para reasignar esos issues antes de eliminarla.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la prioridad a eliminar
+          schema:
+            type: integer
+            example: 1
+        - name: new_priority_id
+          in: query
+          required: false
+          description: ID de la prioridad a la que se reasignarán los issues antes de eliminar
+          schema:
+            type: integer
+            example: 2
+      security:
+        - api_token: []
+      responses:
+        '204':
+          description: Prioridad eliminada exitosamente (sin contenido)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '404':
+          description: Prioridad no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: priority not found
+        '409':
+          description: Ultima prioridad existente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No se puede eliminar la única prioridad existente
+        '400':
+          description: No se ha pasado la prioridad y estaba asociada a un issue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No se puede eliminar esta prioridad porque está asociada a issues y no se proporcionó una nueva prioridad.
+        '500':
+          description: Error interno del servidor
+
+  /statuses:
+    get:
+      tags:
+        - Statuses
+      summary: Lista de statuses
+      description: Retorna todos los statuses disponibles (sin autenticación requerida)
+      responses:
+        '200':
+          description: Lista de statuses obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                    color:
+                      type: string
+                    open:
+                      type: boolean
+        '500':
+          description: Internal server error
+
+    post:
+      tags:
+        - Statuses
+      summary: Crear un nuevo status
+      description: Crea un nuevo status de issue (requiere autenticación)
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+                open:
+                  type: boolean
+              required:
+                - name
+                - color
+                - open
+      responses:
+        '201':
+          description: Status creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  color:
+                    type: string
+                  open:
+                    type: boolean
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Color El formato de color es incorrecto(#RRGGBB)
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '500':
+          description: Error interno del servidor
+
+  /statuses/{id}:
+    get:
+      tags:
+        - Statuses
+      summary: Obtener status por ID
+      description: Retorna un status específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del status a recuperar
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Status encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  color:
+                    type: string
+                  open:
+                    type: boolean
+        '404':
+          description: Status no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Status not found
+        '500':
+          description: Error interno del servidor
+
+    put:
+      tags:
+        - Statuses
+      summary: Actualizar un status existente
+      description: Actualiza un status específico por su ID (requiere autenticación)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del status a actualizar
+          schema:
+            type: integer
+            example: 1
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+                open:
+                  type: boolean
+      responses:
+        '200':
+          description: Status actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  open:
+                    type: boolean
+                  id:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '404':
+          description: Status no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Status not found
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Color El formato de color es incorrecto(#RRGGBB)
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      tags:
+        - Statuses
+      summary: Eliminar un status por ID
+      description: >
+        Elimina un status específico identificado por su ID.
+        Si el status está siendo usado por issues, se debe proporcionar un `new_status_id` para reasignar esos issues antes de eliminar.
+        Requiere autenticación por token.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del status a eliminar
+          schema:
+            type: integer
+            example: 1
+        - name: new_status_id
+          in: query
+          required: false
+          description: ID del nuevo status al que se reasignarán los issues antes de eliminar
+          schema:
+            type: integer
+            example: 2
+      security:
+        - api_token: []
+      responses:
+        '204':
+          description: Status eliminado exitosamente (sin contenido)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API token required
+        '404':
+          description: Status no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Status not found
+        '409':
+          description: Ultimo estatus existente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No se puede eliminar el único status existente
+        '400':
+          description: No se ha pasado el estatus y estaba asociado a un issue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No se puede eliminar este estatus porque está asociado a issues y no se proporcionó un nuevo estatus.
+        '500':
+          description: Error interno del servidor
+
+  /issues/{id}/comments:
+    get:
+      tags:
+        - Comments
+      summary: Obtener comentarios de un issue
+      description: Retorna todos los comentarios asociados a un issue específico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del issue para obtener comentarios
+          schema:
+            type: integer
+            example: 17
+      responses:
+        '200':
+          description: Lista de comentarios obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    issue_id:
+                      type: integer
+                    user_id:
+                      type: integer
+                    content:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                    user:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        email:
+                          type: string
+        '404':
+          description: Issue no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Issue not found
+        '500':
+          description: Error interno del servidor
+
+    post:
+      tags:
+      - Comments
+      summary: Crear comentario en un issue
+      description: Crea un nuevo comentario asociado a un issue (requiere autenticación)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del issue al que se asociará el comentario
+          schema:
+            type: integer
+            example: 17
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - comment
+              properties:
+                comment:
+                  type: object
+                  required:
+                    - content
+                  properties:
+                    content:
+                      type: string
+                      example: "Comentario"
+
+      responses:
+        '201':
+          description: Comentario creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  issue_id:
+                    type: integer
+                  user_id:
+                    type: integer
+                  content:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      email:
+                          type: string
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '404':
+          description: Issue no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Issue not found
+        '500':
+          description: Error interno del servidor
+        '400':
+          description: Solicitud incorrecta (JSON malformado u otros errores del cliente)
+  /issues/{id}/watchers:
+    get:
+      tags:
+        - Watchers
+      summary: Obtener los watchers de una issue
+      description: Devuelve todos los usuarios que son watchers de una issue específica.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la issue
+          schema:
+            type: integer
+            example: 1
+      security:
+        - api_token: []
+      responses:
+        '200':
+          description: Lista de watchers obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 2
+                    name:
+                      type: string
+                      example: name
+                    username:
+                      type: string
+                      example: username
+                    email:
+                      type: string
+                      example: mail@example.com
+                    url:
+                      type: string
+                      example: https://miapp.com/users/2.json
+        '404':
+          description: Issue no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Issue not found
+        '500':
+          description: Error interno del servidor
+
+    post:
+      tags:
+      - Watchers
+      summary: Añadir un watcher a una issue
+      description: Asocia como watcher el usuario indicado a un issue específico (requiere autenticación)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la issue a la que se quiere añadir un watcher.
+          schema:
+            type: integer
+            example: 1
+      security:
+        - api_token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Watcher añadido correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 42
+                  name:
+                    type: string
+                    example: "Juan Perez"
+                  username:
+                    type: string
+                    example: "juanperez"
+                  email:
+                    type: string
+                    example: "juanperez@example.com"
+        '400':
+          description: Solicitud incorrecta (JSON malformado o parámetro requerido faltante)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Missing parameter: user_id"
+        '404':
+          description: Usuario o issue no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User not found
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '500':
+          description: Error interno del servidor
+
+
+  /issues/{issue_id}/watchers/{id}:
+    delete:
+      tags:
+        - Watchers
+      summary: Eliminar un watcher de una issue
+      description: Quita a un usuario previamente añadido como watcher de una issue específica (requiere autenticación).
+      parameters:
+        - name: issue_id
+          in: path
+          required: true
+          description: ID de la issue desde la que se quiere quitar al watcher.
+          schema:
+            type: integer
+            example: 1
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario que se quiere eliminar como watcher.
+          schema:
+            type: integer
+            example: 1
+      security:
+        - api_token: []
+      responses:
+        '204':
+          description: Watcher eliminado correctamente (sin contenido)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        '404':
+          description: Issue o watcher no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Issue not found
+        '401':
+          description: No autorizado (token inválido o ausente)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized (missing token)
+        '500':
+          description: Error interno del servidor
+
+
+components:
+  schemas:
+    ErrorResult:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Content is too long (maximum is 280 characters)'
+      required:
+        - message
+
+  examples:
+    error400:
+      value:
+        message: "Content is too long (maximum is 280 characters)"
+    error401:
+      value:
+        message: "You provided no token"
+    error403:
+      value:
+        message: "You provided an invalid token"
+    error404:
+      value:
+        message: "There is no tweet with 'id'=8"
+
+  securitySchemes:
+    api_token:
+      type: apiKey
+      in: header
+      name: X-Api-Token
