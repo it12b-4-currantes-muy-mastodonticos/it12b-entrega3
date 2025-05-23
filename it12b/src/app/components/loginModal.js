@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { getUsers } from "../apiCall";
-import { emitUserLoginEvent } from "../utils/userEvents";
 
 export default function LoginModal({ isOpen, onClose, onLogin }) {
   const [users, setUsers] = useState([]);
@@ -49,9 +48,6 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
       // Guardar el usuario en localStorage
       localStorage.setItem("currentUser", JSON.stringify(selectedUser));
       localStorage.setItem("currentUserId", selectedUser.id);
-
-      // Emitir el evento de actualización
-      emitUserLoginEvent(selectedUser);
 
       // Llamar al callback de login
       onLogin(selectedUser);
