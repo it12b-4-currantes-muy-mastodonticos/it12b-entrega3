@@ -10,7 +10,7 @@ import {
 } from "../apiCall";
 import LoginModal from "../components/loginModal";
 
-export default function HomePage({ navigate }) {
+export default function IssuesIndexPage({ navigate }) {
   const [issues, setIssues] = useState([]);
   const [types, setTypes] = useState([]);
   const [severities, setSeverities] = useState([]);
@@ -124,7 +124,7 @@ export default function HomePage({ navigate }) {
 
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            onClick={() => (window.location.href = "/issues/new")}
+            onClick={() => navigate("NewIssue")}
           >
             Nueva Issue
           </button>
@@ -290,7 +290,7 @@ export default function HomePage({ navigate }) {
                 <tr
                   key={issue.id}
                   className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => (window.location.href = `/issues/${issue.id}`)}
+                  onClick={() => navigate("ShowIssue", { issueId: issue.id })}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
                     #{issue.id}

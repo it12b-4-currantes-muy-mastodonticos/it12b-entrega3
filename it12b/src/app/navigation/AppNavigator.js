@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import HomePage from "../molecules/IssuesIndexPage";
-import IssueDetailPage from "../molecules/ShowIssuelPage";
+import IssuesIndexPage from "../molecules/IssuesIndexPage";
+import ShowIssuePage from "../molecules/ShowIssuePage";
 import NewIssuePage from "../molecules/NewIssuePage";
 
 export default function AppNavigator() {
-  const [currentScreen, setCurrentScreen] = useState("Home");
+  const [currentScreen, setCurrentScreen] = useState("IndexIssues");
   const [screenParams, setScreenParams] = useState({});
 
   // Función para navegar entre pantallas
@@ -18,16 +18,16 @@ export default function AppNavigator() {
   // Renderiza la pantalla actual basada en currentScreen
   const renderScreen = () => {
     switch (currentScreen) {
-      case "Home":
-        return <HomePage navigate={navigate} />;
-      case "IssueDetail":
+      case "IndexIssues":
+        return <IssuesIndexPage navigate={navigate} />;
+      case "ShowIssue":
         return (
-          <IssueDetailPage issueId={screenParams.issueId} navigate={navigate} />
+          <ShowIssuePage issueId={screenParams.issueId} navigate={navigate} />
         );
       case "NewIssue":
         return <NewIssuePage navigate={navigate} />;
       default:
-        return <HomePage navigate={navigate} />;
+        return <IssuesIndexPage navigate={navigate} />;
     }
   };
 

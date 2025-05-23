@@ -79,7 +79,7 @@ export default function NewIssuePage({ navigate }) {
       }
 
       const newIssue = await createIssue(formData);
-      navigate("IssueDetail", { issueId: newIssue.id });
+      navigate("ShowIssue", { issueId: newIssue.id });
     } catch (error) {
       console.error("Error creating issue:", error);
       setError("Error al crear la issue");
@@ -100,7 +100,7 @@ export default function NewIssuePage({ navigate }) {
         <h1 className="text-3xl font-bold">Nueva Issue</h1>
         <button
           className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
-          onClick={() => navigate("Home")}
+          onClick={() => navigate("IndexIssues")}
         >
           Cancelar
         </button>
@@ -221,7 +221,7 @@ export default function NewIssuePage({ navigate }) {
             <button
               type="button"
               className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 mr-2"
-              onClick={() => navigate("Home")}
+              onClick={() => navigate("IndexIssues")}
             >
               Cancelar
             </button>

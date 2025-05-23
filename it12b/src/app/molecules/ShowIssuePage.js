@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { getIssueById } from "../apiCall";
 
-export default function IssueDetailPage({ issueId, navigate }) {
+export default function ShowIssuePage({ issueId, navigate }) {
   const [issue, setIssue] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -35,7 +35,7 @@ export default function IssueDetailPage({ issueId, navigate }) {
         </div>
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-          onClick={() => navigate("Home")}
+          onClick={() => navigate("IndexIssues")}
         >
           Volver al listado
         </button>
@@ -49,7 +49,7 @@ export default function IssueDetailPage({ issueId, navigate }) {
         <h1 className="text-3xl font-bold">Issue #{issue.id}</h1>
         <button
           className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
-          onClick={() => navigate("Home")}
+          onClick={() => navigate("IndexIssues")}
         >
           Volver al listado
         </button>
