@@ -7,8 +7,10 @@ import {
   getSeverities,
   getPriorities,
   getStatuses,
+  getAuthenticatedUser,
 } from "./apiCall";
 import LoginModal from "./components/loginModal";
+import AuthUserInfo from "./components/authUserInfo";
 
 export default function Home() {
   const [issues, setIssues] = useState([]);
@@ -19,7 +21,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [users, setUsers] = useState([]);
   const [filters, setFilters] = useState({
     type: [],
     severity: [],
@@ -111,6 +112,8 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Issues</h1>
+
+      {currentUser && <AuthUserInfo />}
 
       {/* Filtros y búsqueda */}
       <div className="mb-6 bg-gray-50 p-4 rounded-lg shadow">
