@@ -71,6 +71,24 @@ export default function UserProfilePage({ userId, navigate }) {
           </div>
           <h2 className="text-xl font-bold text-gray-800">{user.name}</h2>
           <p className="text-gray-500">@{user.username}</p>
+
+          {/* Contadores */}
+          <div className="mt-6 flex justify-center gap-x-8">
+            <div className="text-center">
+              <p className="text-lg font-bold text-gray-800">{assignedIssues.length}</p>
+              <p className="text-sm text-gray-500">Open Assigned Issues</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-gray-800">{watchedIssues.length}</p>
+              <p className="text-sm text-gray-500">Watched Issues</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-gray-800">{comments.length}</p>
+              <p className="text-sm text-gray-500">Comments</p>
+            </div>
+          </div>
+
+
           <p className="text-sm text-gray-700 mt-4 text-center">
             {user.bio || "Sin biografía"}
           </p>
