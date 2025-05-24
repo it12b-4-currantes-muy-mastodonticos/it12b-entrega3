@@ -56,7 +56,7 @@ export default function UserProfilePage({ userId, navigate }) {
   };
 
   return (
-    <div className="flex bg-gray-50 min-h-screen">
+    <div className="flex bg-white min-h-screen">
       {/* Sidebar */}
       <div className="w-1/4 bg-white p-6 shadow-md">
         <div className="flex flex-col items-center">
@@ -125,21 +125,37 @@ export default function UserProfilePage({ userId, navigate }) {
 
           {activeTab === "comments" && (
             <div>
-              <h3 className="text-lg font-bold mb-4">Comments</h3>
-              {comments.length > 0 ? (
-                <ul>
-                  {comments.map((comment) => (
-                    <li key={comment.id} className="mb-4">
-                      <p className="text-gray-700">{comment.content}</p>
-                      <p className="text-sm text-gray-500">
-                        En issue #{comment.issue_id}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
+                <h3 className="text-lg font-bold mb-4">Comments</h3>
+                {comments.length > 0 ? (
+                    <ul className="space-y-4">
+                        {comments.map((comment) => (
+                        <li key={comment.id} className="border-b pb-4">
+                            <a
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleIssueClick(comment.issue.id);
+                            }}
+                            className="text-blue-500 hover:underline font-bold"
+                            >
+                            #{comment.issue.id} {comment.issue.title}
+                            </a>
+                            <p className="text-sm text-gray-500">
+                            {new Date(comment.created_at).toLocaleDateString("es-ES", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}
+                            </p>
+                            <p className="text-gray-700">{comment.content}</p>
+                        </li>
+                        ))}
+                    </ul>
+                ) : (
                 <p>No has hecho comentarios.</p>
-              )}
+                )}
             </div>
           )}
         </div>
