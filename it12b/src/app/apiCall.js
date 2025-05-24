@@ -58,6 +58,12 @@ export const createComment = async (issueId, commentData) => {
   return response.data;
 };
 
+// Assigned issues
+export const getAssignedIssuesByUserId = async (userId) => {
+  const response = await api.get(`/users/${userId}/assigned_issues`);
+  return response.data;
+};
+
 // Watchers
 export const getWatchersByUserId = async (userId) => {
   const response = await api.get(`/users/${userId}/watchers`);

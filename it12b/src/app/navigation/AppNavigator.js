@@ -4,9 +4,10 @@ import { useState } from "react";
 import IssuesIndexPage from "../molecules/IssuesIndexPage";
 import ShowIssuePage from "../molecules/ShowIssuePage";
 import NewIssuePage from "../molecules/NewIssuePage";
+import UserProfilePage from "../molecules/UserProfilePage";
 
 export default function AppNavigator() {
-  const [currentScreen, setCurrentScreen] = useState("IndexIssues");
+  const [currentScreen, setCurrentScreen] = useState("UserProfile");
   const [screenParams, setScreenParams] = useState({});
 
   // Función para navegar entre pantallas
@@ -26,6 +27,8 @@ export default function AppNavigator() {
         );
       case "NewIssue":
         return <NewIssuePage navigate={navigate} />;
+      case "UserProfile":
+        return <UserProfilePage userId={1} />;
       default:
         return <IssuesIndexPage navigate={navigate} />;
     }
