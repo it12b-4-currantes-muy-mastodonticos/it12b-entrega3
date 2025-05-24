@@ -98,26 +98,26 @@ export default function UserProfilePage({ userId, navigate }) {
       {/* Main Content */}
       <div className="w-3/4 p-6">
         {/* Tabs */}
-        <div className="flex border-b mb-4">
+        <div className="flex border-b border-t border-gray-200 mb-4">
           <button
-            className={`px-4 py-2 ${
-              activeTab === "assignedIssues" ? "border-b-2 border-blue-500 font-bold" : ""
+            className={`px-4 py-2 relative ${
+              activeTab === "assignedIssues" ? "border-l border-r border-gray-200 font-bold text-gray-500 bg-white top-[1px]" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("assignedIssues")}
           >
             Open Assigned Issues
           </button>
           <button
-            className={`px-4 py-2 ${
-              activeTab === "watchedIssues" ? "border-b-2 border-blue-500 font-bold" : ""
+            className={`px-4 py-2 relative ${
+              activeTab === "watchedIssues" ? "border-l border-r border-gray-200 font-bold text-gray-500 bg-white top-[1px]" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("watchedIssues")}
           >
             Watched Issues
           </button>
           <button
-            className={`px-4 py-2 ${
-              activeTab === "comments" ? "border-b-2 border-blue-500 font-bold" : ""
+            className={`px-4 py-2 relative ${
+              activeTab === "comments" ? "border-l border-r border-gray-200 font-bold text-gray-500 bg-white top-[1px]" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("comments")}
           >
@@ -129,21 +129,18 @@ export default function UserProfilePage({ userId, navigate }) {
         <div>
           {activeTab === "assignedIssues" && (
             <div>
-              <h3 className="text-lg font-bold mb-4">Open Assigned Issues</h3>
               <IssueList issues={assignedIssues} onIssueClick={handleIssueClick} />
             </div>
           )}
 
           {activeTab === "watchedIssues" && (
             <div>
-              <h3 className="text-lg font-bold mb-4">Watched Issues</h3>
               <IssueList issues={watchedIssues} onIssueClick={handleIssueClick} />
             </div>
           )}
 
           {activeTab === "comments" && (
             <div>
-                <h3 className="text-lg font-bold mb-4">Comments</h3>
                 {comments.length > 0 ? (
                     <ul className="space-y-4">
                         {comments.map((comment) => (
