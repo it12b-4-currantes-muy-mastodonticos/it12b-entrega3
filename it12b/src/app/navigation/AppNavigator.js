@@ -28,7 +28,7 @@ export default function AppNavigator() {
       case "NewIssue":
         return <NewIssuePage navigate={navigate} />;
       case "UserProfile":
-        return <UserProfilePage userId={1} />;
+        return <UserProfilePage userId={1} navigate={navigate} />;
       default:
         return <IssuesIndexPage navigate={navigate} />;
     }
