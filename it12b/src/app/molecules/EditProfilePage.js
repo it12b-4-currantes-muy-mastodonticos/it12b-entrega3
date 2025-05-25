@@ -83,7 +83,7 @@ export default function EditProfilePage({ userId, navigate }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Edit Profile</h1>
+      <h1 className="text-2xl text-[#008aa8] font-bold mb-6">Edit Profile</h1>
 
       {/* Sección avatar*/}
         <div className="flex items-center mb-4">
@@ -117,7 +117,7 @@ export default function EditProfilePage({ userId, navigate }) {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md text-gray-500"
+            className="w-full px-4 py-2 border-2 rounded-md text-gray-500 focus:border-[#008aa8] focus:outline-none"
           />
         </div>
 
@@ -128,7 +128,7 @@ export default function EditProfilePage({ userId, navigate }) {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md text-gray-500"
+            className="w-full px-4 py-2 border-2 rounded-md text-gray-500 focus:border-[#008aa8] focus:outline-none"
           />
         </div>
 
@@ -139,7 +139,7 @@ export default function EditProfilePage({ userId, navigate }) {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md text-gray-500"
+            className="w-full px-4 py-2 border-2 rounded-md text-gray-500 focus:border-[#008aa8] focus:outline-none"
           />
         </div>
 
@@ -152,14 +152,14 @@ export default function EditProfilePage({ userId, navigate }) {
             value={formData.bio}
             onChange={handleChange}
             maxLength={210}
-            className="w-full px-4 py-2 border rounded-md text-gray-500"
+            className="w-full px-4 py-2 border-2 rounded-md text-gray-500 focus:border-[#008aa8] focus:outline-none"
           />
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <button
             type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+            className="bg-[#83eede] text-gray-700 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
             disabled={submitting}
           >
             {submitting ? "Saving..." : "SAVE"}
