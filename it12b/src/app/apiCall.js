@@ -16,6 +16,23 @@ export const getAuthenticatedUser = async () => {
   return response.data;
 };
 
+export const updateUser = async (userId, formData) => {
+  const data = new FormData();
+  Object.keys(formData).forEach((key) => {
+    if (formData[key]) {
+      data.append(`user[${key}]`, formData[key]);
+    }
+  });
+
+  const response = await api.put(`/users/${userId}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
+
 // Issues
 export const getIssues = async (params = {}) => {
   const response = await api.get("/issues", { params });
