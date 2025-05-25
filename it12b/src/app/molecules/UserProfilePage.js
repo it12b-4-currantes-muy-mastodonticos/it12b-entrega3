@@ -92,6 +92,14 @@ export default function UserProfilePage({ userId, navigate }) {
           <p className="text-sm text-gray-700 mt-4 text-center">
             {user.bio || "Sin biografía"}
           </p>
+          <div className="mt-4 flex justify-center">
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              onClick={() => navigate("EditProfile", { userId })}
+            >
+              EDIT BIO
+            </button>
+          </div>
         </div>
       </div>
 
