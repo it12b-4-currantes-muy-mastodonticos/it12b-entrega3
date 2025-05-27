@@ -23,13 +23,10 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
     }
   }, [isOpen]);
 
+// Modificación 2: Descomentar y modificar el código que obtiene tokens
   const handleLogin = () => {
-    /*console.log("🔁 handleLogin fue llamado");
-    console.log("🧐 selectedUser: ", selectedUser); // Agregado aquí
-
     if (selectedUser) {
-      console.log("✅ Usuario seleccionado:", selectedUser);
-
+      // Descomentar esta sección y asegurarse de que funcione correctamente
       const tokenMap = {
         1: process.env.NEXT_PUBLIC_USER_TOKEN_1,
         2: process.env.NEXT_PUBLIC_USER_TOKEN_2,
@@ -40,17 +37,20 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
       };
 
       const token = tokenMap[selectedUser.id];
-      console.log(
-        `[LoginModal] Usuario ID: ${selectedUser.id}, Token: ${token}`
-      );*/
-
-    if (selectedUser) {
-      // Guardar el usuario en localStorage
-      localStorage.setItem("currentUser", JSON.stringify(selectedUser));
+      console.log(`[LoginModal] Usuario ID: ${selectedUser.id}, Token: ${token}`);
+      
+      // Construir el objeto usuario con el token
+      const userWithAuth = {
+        ...selectedUser,
+        token: token
+      };
+      
+      // Guardar usuario con token en localStorage
+      localStorage.setItem("currentUser", JSON.stringify(userWithAuth));
       localStorage.setItem("currentUserId", selectedUser.id);
 
-      // Llamar al callback de login
-      onLogin(selectedUser);
+      // Pasar usuario con token al callback
+      onLogin(userWithAuth);
       onClose();
     }
   };

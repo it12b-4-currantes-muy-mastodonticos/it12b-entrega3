@@ -8,6 +8,7 @@ import {
   getPriorities,
   getStatuses,
   getUsers,
+  updateIssue,
 } from "../apiCall";
 import LoginModal from "../components/loginModal";
 
@@ -37,6 +38,8 @@ export default function IssuesIndexPage({ navigate }) {
     field: "updated_at",
     direction: "desc",
   });
+  const [showAssignPopup, setShowAssignPopup] = useState(false);
+  const [currentIssueId, setCurrentIssueId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,13 +47,12 @@ export default function IssuesIndexPage({ navigate }) {
         setLoading(true);
 
         // Cargar los datos de filtrado
-        const [typesData, severitiesData, prioritiesData, statusesData, assignedToData, createdByData] =
+        const [typesData, severitiesData, prioritiesData, statusesData, usersData] =
           await Promise.all([
             getTypes(),
             getSeverities(),
             getPriorities(),
             getStatuses(),
-            getUsers(),
             getUsers(),
           ]);
 
@@ -58,10 +60,11 @@ export default function IssuesIndexPage({ navigate }) {
         setSeverities(severitiesData);
         setPriorities(prioritiesData);
         setStatuses(statusesData);
-        setAssignedTo(assignedToData);
-        setCreatedBy(createdByData);
+        setAssignedTo(usersData);
+        setCreatedBy(usersData);
+        
+        setUsers(usersData);
 
-        // Construir los parámetros de consulta
         const params = {
           sort: sort.field,
           direction: sort.direction,
@@ -81,10 +84,20 @@ export default function IssuesIndexPage({ navigate }) {
         if (filters.createdBy.length > 0)
           params["filter_creator[]"] = filters.createdBy;
 
-
-        // Obtener las issues con los filtros aplicados
         const issuesData = await getIssues(params);
-        setIssues(issuesData);
+        
+        const processedIssues = issuesData.map(issue => {
+          // Si la issue tiene un assigned_to_id, busca el usuario completo
+          if (issue.assigned_to_id) {
+            const assignedUser = usersData.find(user => user.id === issue.assigned_to_id);
+            if (assignedUser) {
+              issue.assigned_to_user = assignedUser;
+            }
+          }
+          return issue;
+        });
+        
+        setIssues(processedIssues);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -92,14 +105,13 @@ export default function IssuesIndexPage({ navigate }) {
       }
     };
 
-    fetchData();
-  }, [filters, sort]);
+  fetchData();
+}, [filters, sort]);
 
   const handleFilterChange = (filterType, value) => {
     if (filterType === "search") {
       setFilters((prev) => ({ ...prev, search: value }));
     } else {
-      // Toggle selection for multiselect filters
       setFilters((prev) => {
         const currentValues = [...prev[filterType]];
         const valueIndex = currentValues.indexOf(value);
@@ -114,6 +126,46 @@ export default function IssuesIndexPage({ navigate }) {
       });
     }
   };
+
+const handleAssignUser = async (userId) => {
+  try {
+    setLoading(true);
+    
+    // Estructura correcta para el PUT request
+    const updateData = { 
+      issue: {
+        assigned_to_id: userId
+      }
+    };
+    
+    console.log('Enviando actualización:', updateData);
+    await updateIssue(currentIssueId, updateData);
+    
+    const assignedUser = users.find(user => user.id === userId);
+    
+    setIssues(issues.map(issue => 
+      issue.id === currentIssueId 
+        ? { 
+            ...issue, 
+            assigned_to_id: userId, 
+            assigned_to_user: userId ? assignedUser : null
+          } 
+        : issue
+    ));
+    
+    setShowAssignPopup(false);
+    setCurrentIssueId(null);
+  } catch (error) {
+    console.error("Error al asignar usuario:", error);
+    // Mostrar detalles adicionales del error para depuración
+    if (error.response) {
+      console.error("Respuesta del servidor:", error.response.data);
+      console.error("Estado HTTP:", error.response.status);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSortChange = (field) => {
     setSort((prev) => ({
@@ -347,16 +399,9 @@ return (
             <tr>
               <th
                 className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSortChange("id")}
-              >
-                ID{" "}
-                {sort.field === "id" && (sort.direction === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
                 onClick={() => handleSortChange("title")}
               >
-                Título{" "}
+                ID / Título{" "}
                 {sort.field === "title" &&
                   (sort.direction === "asc" ? "↑" : "↓")}
               </th>
@@ -396,6 +441,9 @@ return (
                 {sort.field === "updated_at" &&
                   (sort.direction === "asc" ? "↑" : "↓")}
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
+                Asignado a
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -405,10 +453,12 @@ return (
                 className="hover:bg-gray-50 cursor-pointer"
                 onClick={() => navigate("ShowIssue", { issueId: issue.id })}
               >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-800">
-                  #{issue.id}
+                <td className="px-6 py-4 text-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="font-medium text-blue-800">#{issue.id}</span>
+                    <span className="text-gray-900">{issue.title}</span>
+                  </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900">{issue.title}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <span className="inline-flex items-center gap-1">
                     <span
@@ -452,6 +502,42 @@ return (
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(issue.updated_at).toLocaleDateString()}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div className="flex items-center gap-2">
+                    {issue.assigned_to_user ? (
+                      <>
+                        <div className="w-8 h-8 rounded-full overflow-hidden">
+                          {issue.assigned_to_user.avatar_url ? (
+                            <img
+                              src={issue.assigned_to_user.avatar_url}
+                              alt={issue.assigned_to_user.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="w-full h-full bg-gray-300 flex items-center justify-center text-xs">
+                              {issue.assigned_to_user.name?.charAt(0) || '?'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="truncate max-w-[100px]">{issue.assigned_to_user.name}</span>
+                      </>
+                    ) : (
+                      <span className="text-gray-500 italic">Sin asignar</span>
+                    )}
+                    <button
+                      className="ml-2 p-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Evitar que se navegue a la issue al hacer clic en este botón
+                        setCurrentIssueId(issue.id);
+                        setShowAssignPopup(true);
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -492,6 +578,70 @@ return (
           >
             Cerrar sesión
           </button>
+        </div>
+      </div>
+    )}
+    {showAssignPopup && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Asignar usuario</h3>
+            <button
+              className="text-gray-500 hover:text-gray-700"
+              onClick={() => setShowAssignPopup(false)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div className="mb-4">
+            <input 
+              type="text" 
+              placeholder="Buscar usuario..."
+              className="w-full px-4 py-2 border rounded-md text-gray-800"
+              onChange={(e) => {
+                // Aquí podrías implementar una búsqueda local de usuarios
+                // Por simplicidad, no lo implementaremos ahora
+              }}
+            />
+          </div>
+          
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            <div 
+              className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
+              onClick={() => handleAssignUser(null)}
+            >
+              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                <span className="text-gray-600">-</span>
+              </div>
+              <span className="text-gray-800">Sin asignar</span>
+            </div>
+            
+            {assignedTo.map((user) => (
+              <div 
+                key={user.id}
+                className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                onClick={() => handleAssignUser(user.id)}
+              >
+                <div className="w-8 h-8 rounded-full overflow-hidden">
+                  {user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="w-full h-full bg-gray-300 flex items-center justify-center text-xs">
+                      {user.name?.charAt(0) || '?'}
+                    </span>
+                  )}
+                </div>
+                <span className="text-gray-800">{user.name || user.username}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     )}
