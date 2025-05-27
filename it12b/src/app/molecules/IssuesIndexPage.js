@@ -336,7 +336,6 @@ return (
       )}
     </div>
 
-    {/* Tabla de issues - sin cambios */}
     <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
       {loading ? (
         <div className="p-8 text-center text-gray-900">Cargando issues...</div>
@@ -361,17 +360,33 @@ return (
                 {sort.field === "title" &&
                   (sort.direction === "asc" ? "↑" : "↓")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                Tipo
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSortChange("type")}
+              >
+                Tipo{" "}
+                {sort.field === "type" && (sort.direction === "asc" ? "↑" : "↓")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                Severidad
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSortChange("severity")}
+              >
+                Severidad{" "}
+                {sort.field === "severity" && (sort.direction === "asc" ? "↑" : "↓")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                Prioridad
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSortChange("priority")}
+              >
+                Prioridad{" "}
+                {sort.field === "priority" && (sort.direction === "asc" ? "↑" : "↓")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                Estado
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSortChange("status")}
+              >
+                Estado{" "}
+                {sort.field === "status" && (sort.direction === "asc" ? "↑" : "↓")}
               </th>
               <th
                 className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
