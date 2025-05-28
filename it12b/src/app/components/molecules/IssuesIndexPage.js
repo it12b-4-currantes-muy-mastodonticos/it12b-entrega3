@@ -10,9 +10,9 @@ import {
   getUsers,
   updateIssue,
   bulkCreateIssues,
-} from "../apiCall";
-import LoginModal from "../components/loginModal";
-import BulkInsertModal from "../components/BulkInsertModal";
+} from "../../apiCall";
+import LoginModal from "../organisms/loginModal";
+import BulkInsertModal from "../organisms/BulkInsertModal";
 
 
 export default function IssuesIndexPage({ navigate }) {
