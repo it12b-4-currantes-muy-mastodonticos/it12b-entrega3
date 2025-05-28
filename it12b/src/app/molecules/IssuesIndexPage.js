@@ -9,8 +9,10 @@ import {
   getStatuses,
   getUsers,
   updateIssue,
+  bulkCreateIssues,
 } from "../apiCall";
 import LoginModal from "../components/loginModal";
+import BulkInsertModal from "../components/BulkInsertModal";
 
 export default function IssuesIndexPage({ navigate }) {
   const [users, setUsers] = useState([]);
@@ -40,6 +42,7 @@ export default function IssuesIndexPage({ navigate }) {
   });
   const [showAssignPopup, setShowAssignPopup] = useState(false);
   const [currentIssueId, setCurrentIssueId] = useState(null);
+  const [showBulkInsertModal, setShowBulkInsertModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -167,6 +170,54 @@ const handleAssignUser = async (userId) => {
   }
 };
 
+const handleBulkInsert = async (issuesData) => {
+  try {
+    setLoading(true);
+
+    const bulkIssuesText = issuesData.join('\n');
+    
+    console.log('Enviando bulk insert:', bulkIssuesText);
+    
+    const result = await bulkCreateIssues(bulkIssuesText);
+    
+    const params = {
+      sort: sort.field,
+      direction: sort.direction,
+      search: filters.search || undefined,
+    };
+
+    // Añadir los filtros seleccionados si existen
+    if (filters.type.length > 0) params["filter_type[]"] = filters.type;
+    if (filters.severity.length > 0) params["filter_severity[]"] = filters.severity;
+    if (filters.priority.length > 0) params["filter_priority[]"] = filters.priority;
+    if (filters.status.length > 0) params["filter_status[]"] = filters.status;
+    if (filters.assignedTo.length > 0) params["filter_assignee[]"] = filters.assignedTo;
+    if (filters.createdBy.length > 0) params["filter_creator[]"] = filters.createdBy;
+
+    // Recargar las issues
+    const updatedIssues = await getIssues(params);
+    setIssues(updatedIssues);
+    
+    // Cierra el modal
+    setShowBulkInsertModal(false);
+    
+    // Muestra una notificación de éxito con el número de issues creadas
+    // Asumiendo que la API devuelve el número de issues creadas o se puede calcular
+    const createdCount = result?.created_count || issuesData.length;
+    alert(`Se han creado ${createdCount} issues correctamente.`);
+    
+  } catch (error) {
+    console.error("Error en bulk insert:", error);
+    if (error.response) {
+      console.error("Respuesta del servidor:", error.response.data);
+      console.error("Estado HTTP:", error.response.status);
+    }
+    alert("Error al crear las issues. Por favor, inténtelo de nuevo.");
+  } finally {
+    setLoading(false);
+  }
+};
+
   const handleSortChange = (field) => {
     setSort((prev) => ({
       field,
@@ -207,6 +258,14 @@ return (
           onClick={() => navigate("NewIssue")}
         >
           Nueva Issue
+        </button>
+
+          {/* Añade este botón para bulk insert */}
+        <button
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+          onClick={() => setShowBulkInsertModal(true)}
+        >
+          Crear Múltiples Issues
         </button>
 
         <button
@@ -643,6 +702,14 @@ return (
             ))}
           </div>
         </div>
+      </div>
+    )}
+    {showBulkInsertModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <BulkInsertModal
+          onClose={() => setShowBulkInsertModal(false)}
+          onSubmit={handleBulkInsert}
+        />
       </div>
     )}
   </div>

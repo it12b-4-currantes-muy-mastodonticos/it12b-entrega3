@@ -1,6 +1,5 @@
 import api from "./axios.js";
 
-
   api.interceptors.request.use(config => {
     const userString = localStorage.getItem("currentUser");
     if (userString) {
@@ -46,6 +45,13 @@ export const getIssueById = async (id) => {
 
 export const createIssue = async (issueData) => {
   const response = await api.post("/issues", issueData);
+  return response.data;
+};
+
+export const bulkCreateIssues = async (issuesText) => {
+  const response = await api.post("/issues/bulk_create", {
+    bulk_issues: issuesText
+  });
   return response.data;
 };
 
