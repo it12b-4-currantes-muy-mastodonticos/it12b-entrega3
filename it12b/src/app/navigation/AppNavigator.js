@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import IssuesIndexPage from "../molecules/IssuesIndexPage";
-import ShowIssuePage from "../molecules/ShowIssuePage";
-import NewIssuePage from "../molecules/NewIssuePage";
+import IssuesIndexPage from "../components/molecules/IssuesIndexPage";
+import ShowIssuePage from "../components/molecules/ShowIssuePage";
+import NewIssuePage from "../components/molecules/NewIssuePage";
 
 export default function AppNavigator() {
   const [currentScreen, setCurrentScreen] = useState("IndexIssues");

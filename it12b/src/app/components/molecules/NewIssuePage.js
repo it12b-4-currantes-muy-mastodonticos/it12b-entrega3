@@ -6,7 +6,7 @@ import {
   getSeverities,
   getPriorities,
   createIssue,
-} from "../apiCall";
+} from "../../apiCall";
 
 export default function NewIssuePage({ navigate }) {
   const [formData, setFormData] = useState({

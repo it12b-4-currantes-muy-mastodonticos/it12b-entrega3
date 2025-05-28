@@ -14,6 +14,7 @@ import {
 import LoginModal from "../components/loginModal";
 import BulkInsertModal from "../components/BulkInsertModal";
 
+
 export default function IssuesIndexPage({ navigate }) {
   const [users, setUsers] = useState([]);
   const [assignedTo, setAssignedTo] = useState([]);
