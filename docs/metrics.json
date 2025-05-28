@@ -8,50 +8,50 @@
         "professor-asw": "https://avatars.githubusercontent.com/u/126955320?v=4"
     },
     "commits": {
-        "AlejandroComadran": 25,
-        "alexcantarero": 82,
-        "MarkitusHD97": 33,
-        "nataliayikewang": 44,
-        "anonymous": 0,
-        "total": 184
+        "AlejandroComadran": 29,
+        "alexcantarero": 89,
+        "MarkitusHD97": 44,
+        "nataliayikewang": 52,
+        "anonymous": 1,
+        "total": 215
     },
     "modified_lines": {
         "AlejandroComadran": {
-            "additions": 78277,
-            "deletions": 1119,
-            "modified": 79396
+            "additions": 80680,
+            "deletions": 1123,
+            "modified": 81803
         },
         "alexcantarero": {
-            "additions": 33378,
-            "deletions": 1004,
-            "modified": 34382
+            "additions": 34470,
+            "deletions": 1511,
+            "modified": 35981
         },
         "MarkitusHD97": {
-            "additions": 5447,
-            "deletions": 278,
-            "modified": 5725
+            "additions": 15784,
+            "deletions": 369,
+            "modified": 16153
         },
         "nataliayikewang": {
-            "additions": 64189,
-            "deletions": 1354,
-            "modified": 65543
+            "additions": 66233,
+            "deletions": 2189,
+            "modified": 68422
         },
         "total": {
-            "additions": 181291,
-            "deletions": 3755,
-            "modified": 185046
+            "additions": 197167,
+            "deletions": 5192,
+            "modified": 202359
         }
     },
     "commit_streak": {
         "AlejandroComadran": 0,
-        "alexcantarero": 1,
+        "alexcantarero": 2,
         "MarkitusHD97": 0,
         "nataliayikewang": 0
     },
-    "commit_merges": 33,
+    "commit_merges": 34,
     "longest_commit_streak_per_user": {
         "AlejandroComadran": 1,
-        "alexcantarero": 1,
+        "alexcantarero": 2,
         "MarkitusHD97": 0,
         "nataliayikewang": 0
     },
@@ -77,20 +77,20 @@
     "pull_requests": {
         "created": {
             "AlejandroComadran": 2,
-            "alexcantarero": 2,
+            "alexcantarero": 3,
             "MarkitusHD97": 0,
             "nataliayikewang": 1
         },
         "merged_per_member": {
             "AlejandroComadran": 1,
-            "alexcantarero": 2,
+            "alexcantarero": 3,
             "MarkitusHD97": 0,
             "nataliayikewang": 0
         },
-        "merged": 3,
+        "merged": 4,
         "not_merged_by_author": 0,
         "closed": 2,
-        "total": 5
+        "total": 6
     },
     "project": {
         "assigned_per_member": {
