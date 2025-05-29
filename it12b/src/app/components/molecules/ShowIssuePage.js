@@ -11,6 +11,7 @@ import {
   getSeverities,
   getStatuses,
   getTypes,
+  addWatcherToIssue,
 } from "../../apiCall";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -210,6 +211,21 @@ export default function ShowIssuePage({ issueId, navigate }) {
       console.error("Error adding comment:", error);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleWatchClick = async () => {
+    if (!currentUser) {
+      alert("Debes estar logueado para observar esta issue.");
+      return;
+    }
+
+    try {
+      await addWatcherToIssue(issueId, currentUser.id);
+      alert("Ahora estás observando esta issue.");
+    } catch (error) {
+      console.error("Error al añadir watcher:", error);
+      alert("No se pudo añadir como watcher. Inténtalo de nuevo.");
     }
   };
 
@@ -475,6 +491,13 @@ export default function ShowIssuePage({ issueId, navigate }) {
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">WATCHERS</div>
             {/* Aquí iría la lista de watchers */}
+            <div className="issuepage-sidebar-buttons">
+              <button className="issuepage-sidebar-btn text-gray-500">+ Add watchers</button>
+              <button className="issuepage-sidebar-btn text-gray-500"
+                      onClick={handleWatchClick}>
+                      👁 Watch
+              </button>
+            </div>
           </div>
         </aside>
       </div>
