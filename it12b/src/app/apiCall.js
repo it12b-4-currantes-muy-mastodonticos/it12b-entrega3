@@ -19,9 +19,7 @@ export const getAuthenticatedUser = async () => {
 export const updateUser = async (userId, formData) => {
   const data = new FormData();
   Object.keys(formData).forEach((key) => {
-    if (formData[key]) {
-      data.append(`user[${key}]`, formData[key]);
-    }
+  data.append(`user[${key}]`, formData[key]);
   });
 
   const response = await api.put(`/users/${userId}`, data, {
