@@ -8,18 +8,18 @@
         "professor-asw": "https://avatars.githubusercontent.com/u/126955320?v=4"
     },
     "commits": {
-        "AlejandroComadran": 29,
+        "AlejandroComadran": 30,
         "alexcantarero": 91,
         "MarkitusHD97": 47,
         "nataliayikewang": 53,
         "anonymous": 1,
-        "total": 221
+        "total": 222
     },
     "modified_lines": {
         "AlejandroComadran": {
-            "additions": 80680,
-            "deletions": 1123,
-            "modified": 81803
+            "additions": 81702,
+            "deletions": 1274,
+            "modified": 82976
         },
         "alexcantarero": {
             "additions": 35399,
@@ -37,13 +37,13 @@
             "modified": 69188
         },
         "total": {
-            "additions": 198910,
-            "deletions": 5686,
-            "modified": 204596
+            "additions": 199932,
+            "deletions": 5837,
+            "modified": 205769
         }
     },
     "commit_streak": {
-        "AlejandroComadran": 0,
+        "AlejandroComadran": 1,
         "alexcantarero": 2,
         "MarkitusHD97": 1,
         "nataliayikewang": 1
