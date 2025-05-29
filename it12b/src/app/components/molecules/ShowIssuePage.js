@@ -15,6 +15,7 @@ import {
   getWatchersByIssueId,
   removeWatcherFromIssue,
   deleteAttachment,
+  deleteDueDate,
 } from "../../apiCall";
 import { format } from "date-fns";
 import { es, se } from "date-fns/locale";
@@ -114,6 +115,11 @@ export default function ShowIssuePage({ issueId, navigate }) {
       fieldValue !== "" &&
       issue?.status_id !== parseInt(fieldValue)
     ) {
+      const newStatus = statuses.find(s => s.id === parseInt(fieldValue));
+      if (newStatus && !newStatus.open) {
+        setShowDueDateModal(false);
+        setShowDeleteConfirm(false);
+      }
       saveField("status_id");
     }
     if (
@@ -158,6 +164,11 @@ export default function ShowIssuePage({ issueId, navigate }) {
     processAttachments();
   }, [files]);
 
+  const isIssueClosed = () => {
+    if(issue.status && !issue.status.open) return true;
+    else return false;
+  };
+
   // Inline edit handlers
   const handleFieldClick = (field, value) => {
     setEditingField(field);
@@ -165,6 +176,11 @@ export default function ShowIssuePage({ issueId, navigate }) {
   };
 
   const handleOpenDueDateModal = () => {
+    if (isIssueClosed()) {
+      setError("You cannot establish a due date in a closed issue");
+      return;
+    }
+
     setDueDateValue(issue?.due_date || "");
     setDueDateReasonValue(issue?.due_date_reason || "");
     setShowDueDateModal(true);
@@ -207,33 +223,29 @@ export default function ShowIssuePage({ issueId, navigate }) {
   };
 
   const confirmDeleteDueDate = async () => {
-    setSavingField(true);
-    try {
-      const payload = {
-        title: issue.title,
-        description: issue.description?.body,
-        assigned_to_id: issue.assigned_to_id,
-        status_id: issue.status_id,
-        priority_id: issue.priority_id,
-        severity_id: issue.severity_id,
-        issue_type_id: issue.issue_type_id,
-        due_date: null,
-        due_date_reason: null,
-        blocked: issue.blocked,
-      };
-
-      const updatedIssue = await updateIssue(issueId, { issue: payload });
-      setIssue(updatedIssue);
-      setDueDateValue("");
-      setDueDateReasonValue("");
-      setShowDueDateModal(false);
-      setShowDeleteConfirm(false);
-    } catch (e) {
-      alert("Error deliting the due date");
-    } finally {
-      setSavingField(false);
-    }
-  };
+  setSavingField(true);
+  try {
+    
+    await deleteDueDate(issueId);
+    
+    // Actualizar el estado local
+    setIssue(prevIssue => ({
+      ...prevIssue,
+      due_date: null,
+      due_date_reason: null
+    }));
+    
+    setDueDateValue("");
+    setDueDateReasonValue("");
+    setShowDueDateModal(false);
+    setShowDeleteConfirm(false);
+  } catch (e) {
+    console.error("Error deleting the due date:", e);
+    alert("Error deleting the due date");
+  } finally {
+    setSavingField(false);
+  }
+};
 
   const handleFieldChange = (e) => {
     setFieldValue(e.target.value);
@@ -983,13 +995,15 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   <div className="issuepage-sidebar-date-reason">
                     {issue.due_date_reason}
                   </div>
-                )}
-                <button
-                  className="issuepage-sidebar-btn"
-                  onClick={handleOpenDueDateModal}
-                >
-                  Editar fecha
-                </button>
+                  )}
+                  <button 
+                    className={`issuepage-sidebar-btn ${isIssueClosed() ? "issuepage-btn-disabled" : ""}`} 
+                    onClick={handleOpenDueDateModal}
+                    disabled={isIssueClosed()}
+                  >
+                    Edit due date
+                  </button>
+                </div>
               </div>
             ) : (
               <button
