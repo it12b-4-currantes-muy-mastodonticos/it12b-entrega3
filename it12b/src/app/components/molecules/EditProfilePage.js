@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { updateUser, getUserById } from "../apiCall";
+import { updateUser, getUserById } from "../../apiCall";
 
 export default function EditProfilePage({ userId, navigate }) {
   const [formData, setFormData] = useState({

@@ -9,7 +9,7 @@ import UserProfilePage from "../components/molecules/UserProfilePage";
 import EditProfilePage from "../components/molecules/EditProfilePage";
 
 export default function AppNavigator() {
-  const [currentScreen, setCurrentScreen] = useState("UserProfile");
+  const [currentScreen, setCurrentScreen] = useState("");
   const [screenParams, setScreenParams] = useState({});
 
   // Función para navegar entre pantallas

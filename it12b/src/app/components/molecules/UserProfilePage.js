@@ -6,8 +6,8 @@ import {
   getAssignedIssuesByUserId,
   getWatchersByUserId,
   getCommentsByUserId,
-} from "../apiCall";
-import IssueList from "../components/IssueList";
+} from "../../apiCall";
+import IssueList from "../organisms/IssueList";
 
 export default function UserProfilePage({ userId, navigate }) {
   const [user, setUser] = useState(null);
