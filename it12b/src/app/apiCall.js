@@ -95,6 +95,11 @@ export const deleteAttachment = async (issueId, blobId) => {
   return response.data;
 };
 
+export const deleteDueDate = async (issueId) => {
+  const response = await api.delete(`/issues/${issueId}/due_date`);
+  return response.data;
+};
+
 
 // Comments
 export const getCommentsByUserId = async (userId) => {
