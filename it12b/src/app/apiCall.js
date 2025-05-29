@@ -101,14 +101,24 @@ export const createComment = async (issueId, commentData) => {
 };
 
 // Assigned issues
-export const getAssignedIssuesByUserId = async (userId) => {
-  const response = await api.get(`/users/${userId}/assigned_issues`);
+export const getAssignedIssuesByUserId = async (userId, sortField = "", sortDirection = "asc") => {
+  const response = await api.get(`/users/${userId}/assigned_issues`, {
+    params: {
+      sort: sortField,
+      direction: sortDirection,
+    },
+  });
   return response.data;
 };
 
 // Watchers
-export const getWatchersByUserId = async (userId) => {
-  const response = await api.get(`/users/${userId}/watchers`);
+export const getWatchedIssuesByUserId = async (userId, sortField = "", sortDirection = "asc") => {
+  const response = await api.get(`/users/${userId}/watchers`, {
+    params: {
+      sort: sortField,
+      direction: sortDirection,
+    },
+  });
   return response.data;
 };
 

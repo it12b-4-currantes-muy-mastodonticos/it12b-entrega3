@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
   getUserById,
   getAssignedIssuesByUserId,
-  getWatchersByUserId,
+  getWatchedIssuesByUserId,
   getCommentsByUserId,
 } from "../../apiCall";
 import IssueList from "../organisms/IssueList";
@@ -16,7 +16,10 @@ export default function UserProfilePage({ userId, navigate }) {
   const [watchedIssues, setWatchedIssues] = useState([]);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [assignedSort, setAssignedSort] = useState({ field: "issue", direction: "asc" });
+  const [watchedSort, setWatchedSort] = useState({ field: "issue", direction: "asc" });
 
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,8 +28,8 @@ export default function UserProfilePage({ userId, navigate }) {
         setUser(userData);
 
         const [assigned, watched, userComments] = await Promise.all([
-          getAssignedIssuesByUserId(userId),
-          getWatchersByUserId(userId),
+          getAssignedIssuesByUserId(userId, assignedSort.field, assignedSort.direction),
+          getWatchedIssuesByUserId(userId, watchedSort.field, watchedSort.direction),
           getCommentsByUserId(userId),
         ]);
 
@@ -41,7 +44,7 @@ export default function UserProfilePage({ userId, navigate }) {
     };
 
     fetchData();
-  }, [userId]);
+  }, [userId, assignedSort, watchedSort]);
 
   if (loading) {
     return <div className="container mx-auto px-4 py-8">Cargando perfil...</div>;
@@ -53,6 +56,15 @@ export default function UserProfilePage({ userId, navigate }) {
 
   const handleIssueClick = (issueId) => {
     navigate("ShowIssue", { issueId });
+  };
+    
+  const handleAssignedSortChange = (field, direction) => {
+  setAssignedSort({ field, direction });
+  console.log(assignedSort);
+  };
+
+  const handleWatchedSortChange = (field, direction) => {
+    setWatchedSort({ field, direction });
   };
 
   return (
@@ -142,13 +154,21 @@ export default function UserProfilePage({ userId, navigate }) {
         <div>
           {activeTab === "assignedIssues" && (
             <div>
-              <IssueList issues={assignedIssues} onIssueClick={handleIssueClick} />
+              <IssueList issues={assignedIssues} onIssueClick={handleIssueClick}
+              onSortChange={handleAssignedSortChange}
+              sortField={assignedSort.field}
+              sortDirection={assignedSort.direction} 
+              />
             </div>
           )}
 
           {activeTab === "watchedIssues" && (
             <div>
-              <IssueList issues={watchedIssues} onIssueClick={handleIssueClick} />
+              <IssueList issues={watchedIssues} onIssueClick={handleIssueClick}
+              onSortChange={handleWatchedSortChange}
+              sortField={watchedSort.field}
+              sortDirection={watchedSort.direction} 
+              />
             </div>
           )}
 
