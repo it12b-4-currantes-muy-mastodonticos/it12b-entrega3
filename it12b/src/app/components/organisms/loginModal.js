@@ -46,7 +46,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
       6: process.env.NEXT_PUBLIC_USER_TOKEN_6 || hardcodedTokenMap[6],
     };
       const token = tokenMap[selectedUser.id];
-      console.log(`[LoginModal] Usuario ID: ${selectedUser.id}, Token available: ${!!token}`);
+      console.log(`[LoginModal] Usuario ID: ${selectedUser.id}, Token available: ${token}`);
       
       // Construir el objeto usuario con el token
       const userWithAuth = {
