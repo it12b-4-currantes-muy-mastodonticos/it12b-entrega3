@@ -151,8 +151,9 @@
           height: 16px;
           fill: black;
         }
+
 .issuepage-sidebar-section { margin-bottom: 1.5rem; }
-.issuepage-sidebar-label { color: #64748b; font-size: 0.95rem; margin-bottom: 0.2rem; paddingTop: }
+.issuepage-sidebar-label { color: #64748b; font-size: 0.95rem; margin-bottom: 0.2rem;}
 .issuepage-sidebar-value { font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; color: #666b6d;}
 .issuepage-sidebar-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 0.5rem; }
 .issuepage-sidebar-assigned { background: #fff; border-radius: 4px; padding: 0.5rem; display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.7rem; }
