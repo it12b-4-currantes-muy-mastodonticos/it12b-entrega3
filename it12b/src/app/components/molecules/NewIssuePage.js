@@ -9,8 +9,8 @@ import {
   getStatuses,
   getUsers,
   createIssue,
-} from "../apiCall";
-import LoginModal from "../components/loginModal";
+} from "../../apiCall";
+import LoginModal from "../organisms/loginModal";
 
 export default function NewIssuePage({ navigate }) {
   const [formData, setFormData] = useState({
