@@ -94,6 +94,7 @@
   align-items: center;
   gap: 8px;
   color: #1e293b;
+  position: relative;
 }
 
 .issuepage-sidebar-avatar {
@@ -141,4 +142,7 @@
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+}
+button {
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }

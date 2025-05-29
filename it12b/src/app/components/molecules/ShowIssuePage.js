@@ -13,7 +13,7 @@ import {
   getTypes,
   addWatcherToIssue,
   getWatchersByIssueId,
-  getUserById,
+  removeWatcherFromIssue
 } from "../../apiCall";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -511,7 +511,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   const watcher = users.find((user) => user.id === watcherId.id);
                   console.log("Watcher:", watcher);
                   return (
-                    <div key={watcherId.id} className="issuepage-sidebar-watcher">
+                    <div key={watcherId.id} className="issuepage-sidebar-watcher relative group flex items-center gap-2">
                       {watcher?.avatar_url && (
                         <img
                           src={watcher.avatar_url}
@@ -520,6 +520,20 @@ export default function ShowIssuePage({ issueId, navigate }) {
                         />
                       )}
                       <span>{watcher?.name || "Unknown User"}</span>
+                      <button
+                        className="absolute right-0 top-1/2 transform -translate-y-1/2 text-black hidden group-hover:flex items-center justify-center w-6 h-6 text-white rounded-full hover:text-red-600"
+                        onClick={async () => {
+                          try {
+                            await removeWatcherFromIssue(issueId, watcherId.id);
+                            const updatedWatchers = await getWatchersByIssueId(issueId);
+                            setWatchers(updatedWatchers);
+                          } catch (error) {
+                            console.error("Error removing watcher:", error);
+                          }
+                        }}
+                      >
+                        ✖
+                      </button>
                     </div>
                   );
                 })
