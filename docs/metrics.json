@@ -48,7 +48,7 @@
         "MarkitusHD97": 1,
         "nataliayikewang": 2
     },
-    "commit_merges": 39,
+    "commit_merges": 40,
     "longest_commit_streak_per_user": {
         "AlejandroComadran": 1,
         "alexcantarero": 2,
@@ -84,11 +84,11 @@
         "merged_per_member": {
             "AlejandroComadran": 3,
             "alexcantarero": 3,
-            "MarkitusHD97": 0,
+            "MarkitusHD97": 1,
             "nataliayikewang": 0
         },
-        "merged": 6,
-        "not_merged_by_author": 2,
+        "merged": 7,
+        "not_merged_by_author": 3,
         "closed": 2,
         "total": 9
     },
