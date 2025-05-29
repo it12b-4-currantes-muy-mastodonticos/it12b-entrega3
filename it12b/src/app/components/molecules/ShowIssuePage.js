@@ -40,6 +40,13 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const [statuses, setStatuses] = useState([]);
   const [types, setTypes] = useState([]);
 
+  //watchers modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -228,10 +235,11 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
     try {
       await addWatcherToIssue(issueId, currentUser.id);
-      alert("Ahora estás observando esta issue.");
+
+    const updatedWatchers = await getWatchersByIssueId(issueId);
+    setWatchers(updatedWatchers);
     } catch (error) {
       console.error("Error al añadir watcher:", error);
-      alert("No se pudo añadir como watcher. Inténtalo de nuevo.");
     }
   };
 
@@ -503,7 +511,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   const watcher = users.find((user) => user.id === watcherId.id);
                   console.log("Watcher:", watcher);
                   return (
-                    <div key={watcherId} className="issuepage-sidebar-watcher">
+                    <div key={watcherId.id} className="issuepage-sidebar-watcher">
                       {watcher?.avatar_url && (
                         <img
                           src={watcher.avatar_url}
@@ -520,7 +528,12 @@ export default function ShowIssuePage({ issueId, navigate }) {
               )}
             </div>
             <div className="issuepage-sidebar-buttons">
-              <button className="issuepage-sidebar-btn text-gray-500">+ Add watchers</button>
+              <button
+                className="issuepage-sidebar-btn text-gray-500"
+                onClick={openModal}
+              >
+                + Add watchers
+              </button>
               <button className="issuepage-sidebar-btn text-gray-500"
                       onClick={handleWatchClick}>
                       👁 Watch
@@ -529,6 +542,71 @@ export default function ShowIssuePage({ issueId, navigate }) {
           </div>
         </aside>
       </div>
+      {isModalOpen && (
+      <div className="modal-overlay">
+        <div className="modal-content">
+          {/* Botón para cerrar el modal */}
+          <button
+            className="absolute top-10 right-10 bg-gray-100 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-400"
+            onClick={closeModal}
+            title="Close"
+          >
+            ✖
+          </button>
+          <h2 className="text-lg font-bold mb-4 text-gray-500">Add Watchers</h2>
+          <div className="modal-users-list text-gray-500">
+            {users
+              .filter((user) => !watchers.some((watcher) => watcher.id === user.id)) // Filtrar usuarios que no son watchers
+              .map((user) => {
+                const isSelected = selectedUsers.includes(user.id);
+              return (
+                <div
+                  key={user.id}
+                  className={`modal-user-item flex items-center gap-2 p-2 rounded-md cursor-pointer ${
+                    isSelected ? "bg-green-500 text-white" : "bg-gray-100"
+                  }`}
+                  onClick={() => {
+                    setSelectedUsers((prev) =>
+                      isSelected
+                        ? prev.filter((id) => id !== user.id) // Deselect
+                        : [...prev, user.id] // Select
+                    );
+                  }}
+                >
+                  <img
+                    src={user.avatar_url}
+                    alt={user.name}
+                    className="modal-user-avatar"
+                  />
+                  <span>{user.name}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="modal-actions mt-4 flex justify-center">
+            <button
+              className="bg-[#83eede] text-gray-700 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
+              onClick={async () => {
+                try {
+                  await Promise.all(
+                    selectedUsers.map((userId) =>
+                      addWatcherToIssue(issueId, userId)
+                    )
+                  );
+                  const updatedWatchers = await getWatchersByIssueId(issueId);
+                  setWatchers(updatedWatchers);
+                  closeModal();
+                } catch (error) {
+                  console.error("Error adding watchers:", error);
+                }
+              }}
+            >
+              ADD
+            </button>
+          </div>
+        </div>
+      </div>
+      )}
     </div>
   );
 }
