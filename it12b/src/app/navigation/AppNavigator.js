@@ -4,6 +4,7 @@ import { useState } from "react";
 import IssuesIndexPage from "../components/molecules/IssuesIndexPage";
 import ShowIssuePage from "../components/molecules/ShowIssuePage";
 import NewIssuePage from "../components/molecules/NewIssuePage";
+import AdminSettingsPage from "../components/molecules/AdminSettingsPage";
 
 export default function AppNavigator() {
   const [currentScreen, setCurrentScreen] = useState("IndexIssues");
@@ -26,6 +27,8 @@ export default function AppNavigator() {
         );
       case "NewIssue":
         return <NewIssuePage navigate={navigate} />;
+      case "AdminSettings":
+        return <AdminSettingsPage navigate={navigate} />;
       default:
         return <IssuesIndexPage navigate={navigate} />;
     }
