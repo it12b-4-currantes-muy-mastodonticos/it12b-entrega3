@@ -14,6 +14,7 @@ import {
 } from "../../apiCall";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import "./ShowIssuePage.css";
 
 export default function ShowIssuePage({ issueId, navigate }) {
   const [issue, setIssue] = useState(null);
@@ -194,7 +195,15 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
     try {
       setSubmitting(true);
-      const newComment = await createComment(issueId, commentText);
+
+      const payload = {
+        comment: {
+          content: commentText.trim(),
+        },
+      };
+
+      const newComment = await createComment(issueId, payload);
+
       setComments([...comments, newComment]);
       setCommentText("");
     } catch (error) {
@@ -224,7 +233,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
           onClick={() => navigate("IndexIssues")}
         >
-          Volver al listado
+          Back to issues
         </button>
       </div>
     );
@@ -235,37 +244,19 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const hasDescription = issue.description?.body;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      {/* Navegación */}
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => navigate("IndexIssues")}
-          className="text-blue-500 hover:underline flex items-center"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-1"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+    <div className="issuepage-root">
+      <div className="issuepage-wrapper">
+        {/* HEADER */}
+        <div className="issuepage-header">
+          <a
+            href="#"
+            className="issuepage-back"
+            onClick={() => navigate("IndexIssues")}
           >
-            <path
-              fillRule="evenodd"
-              d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Volver a issues
-        </button>
-      </div>
-
-      {/* Encabezado de la issue */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div className="p-6">
-          <div className="flex justify-between items-start">
-            <div className="w-full mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Título
-              </label>
+            Back to issues
+          </a>
+          <div className="issuepage-titleblock">
+            <span>
               {editingField === "title" ? (
                 <input
                   type="text"
@@ -274,16 +265,17 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   onChange={handleFieldChange}
                   onBlur={() => handleFieldBlur("title")}
                   onKeyDown={(e) => handleFieldKeyDown(e, "title")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                  className="issuepage-title"
                   disabled={savingField}
                 />
               ) : (
                 <h1
-                  className="text-2xl font-bold mb-2 cursor-pointer text-gray-500"
+                  className="issuepage-title"
                   onClick={() => handleFieldClick("title", issue.title)}
                   title="Haz click para editar"
                 >
-                  #{issue.id} {issue.title}
+                  <span className="issuepage-id">#{issue.id}</span>
+                  {issue.title}
                   {savingField && editingField === null && (
                     <span className="ml-2 text-xs text-gray-400">
                       Guardando...
@@ -291,151 +283,32 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   )}
                 </h1>
               )}
-            </div>
-            <div className="flex items-center">
-              <span
-                className="px-2 py-1 rounded text-xs font-medium"
-                style={{
-                  backgroundColor: issue.status?.color,
-                  color: "#000",
-                }}
-              >
-                {issue.status?.name}
-              </span>
-            </div>
+            </span>
           </div>
+          <span className="issuepage-type">ISSUE</span>
 
-          {/* Campos tipo, prioridad, severidad, estado */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {/* Tipo */}
-            {editingField === "issue_type_id" ? (
-              <select
-                value={fieldValue}
-                autoFocus
-                onChange={handleFieldChange}
-                onBlur={() => handleFieldBlur("issue_type_id")}
-                onKeyDown={(e) => handleFieldKeyDown(e, "issue_type_id")}
-                className="px-2 py-1 rounded text-xs font-medium"
-                style={{
-                  backgroundColor: issue.issue_type?.color,
-                  color: "#000",
-                }}
-                disabled={savingField}
-              >
-                {types.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span
-                className="px-2 py-1 rounded text-xs font-medium cursor-pointer"
-                style={{
-                  backgroundColor: issue.issue_type?.color,
-                  color: "#000",
-                }}
-                onClick={() =>
-                  handleFieldClick("issue_type_id", issue.issue_type_id)
-                }
-                title="Haz click para editar"
-              >
-                {issue.issue_type?.name}
-              </span>
-            )}
-
-            {/* Prioridad */}
-            {editingField === "priority_id" ? (
-              <select
-                value={fieldValue}
-                autoFocus
-                onChange={handleFieldChange}
-                onBlur={() => handleFieldBlur("priority_id")}
-                onKeyDown={(e) => handleFieldKeyDown(e, "priority_id")}
-                className="px-2 py-1 rounded text-xs font-medium"
-                style={{
-                  backgroundColor: issue.priority?.color,
-                  color: "#000",
-                }}
-                disabled={savingField}
-              >
-                {priorities.map((priority) => (
-                  <option key={priority.id} value={priority.id}>
-                    {priority.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span
-                className="px-2 py-1 rounded text-xs font-medium cursor-pointer"
-                style={{
-                  backgroundColor: issue.priority?.color,
-                  color: "#000",
-                }}
-                onClick={() =>
-                  handleFieldClick("priority_id", issue.priority_id)
-                }
-                title="Haz click para editar"
-              >
-                {issue.priority?.name}
-              </span>
-            )}
-
-            {/* Severidad */}
-            {editingField === "severity_id" ? (
-              <select
-                value={fieldValue}
-                autoFocus
-                onChange={handleFieldChange}
-                onBlur={() => handleFieldBlur("severity_id")}
-                onKeyDown={(e) => handleFieldKeyDown(e, "severity_id")}
-                className="px-2 py-1 rounded text-xs font-medium"
-                style={{
-                  backgroundColor: issue.severity?.color,
-                  color: "#000",
-                }}
-                disabled={savingField}
-              >
-                {severities.map((severity) => (
-                  <option key={severity.id} value={severity.id}>
-                    {severity.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span
-                className="px-2 py-1 rounded text-xs font-medium cursor-pointer"
-                style={{
-                  backgroundColor: issue.severity?.color,
-                  color: "#000",
-                }}
-                onClick={() =>
-                  handleFieldClick("severity_id", issue.severity_id)
-                }
-                title="Haz click para editar"
-              >
-                {issue.severity?.name}
-              </span>
-            )}
-
-            {/* Bloqueada */}
-            <label className="flex items-center cursor-pointer ml-2">
-              <input
-                type="checkbox"
-                checked={issue.blocked}
-                onChange={handleCheckboxChange}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                disabled={savingField}
+          <div className="issuepage-meta">
+            <span>Created by {creatorUser?.name}</span>
+            <span>
+              {format(new Date(issue.created_at), "dd MMM HH:mm", {
+                locale: es,
+              })}
+            </span>
+            {creatorUser?.avatar_url && (
+              <img
+                className="issuepage-avatar"
+                src={creatorUser.avatar_url}
+                alt={creatorUser.name}
               />
-              <span className="ml-1 text-xs text-gray-900">Bloqueada</span>
-            </label>
+            )}
           </div>
+        </div>
+      </div>
 
-          {/* Descripción */}
-          <div className="border-t border-gray-200 pt-4 mb-6">
-            <h2 className="text-lg font-semibold mb-2 text-gray-500">
-              Descripción
-            </h2>
+      <div className="issuepage-main">
+        {/* DESCRIPTIION */}
+        <div className="issuepage-content">
+          <div className="issuepage-description">
             {editingField === "description" ? (
               <textarea
                 value={fieldValue}
@@ -443,12 +316,12 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 onChange={handleFieldChange}
                 onBlur={() => handleFieldBlur("description")}
                 onKeyDown={(e) => handleFieldKeyDown(e, "description")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm h-32"
+                className="issuepage-description-body"
                 disabled={savingField}
               />
             ) : (
               <div
-                className="prose max-w-none cursor-pointer text-gray-500"
+                className="issuepage-description-body"
                 onClick={() =>
                   handleFieldClick("description", issue.description?.body)
                 }
@@ -462,270 +335,150 @@ export default function ShowIssuePage({ issueId, navigate }) {
             )}
           </div>
 
-          {/* Información adicional */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-4">
-            <div>
-              <h3 className="text-black font-semibold mb-3">Detalles</h3>
-              <div className="space-y-2">
-                {/* Creado por */}
-                <div className="flex items-start">
-                  <span className="text-gray-500 w-28">Creado por:</span>
-                  <div className="flex items-center">
-                    {creatorUser?.avatar_url ? (
-                      <img
-                        src={creatorUser.avatar_url}
-                        alt={creatorUser.name}
-                        width={24}
-                        height={24}
-                        className="rounded-full mr-2"
-                      />
-                    ) : (
-                      <div className="w-6 h-6 bg-gray-300 rounded-full mr-2"></div>
-                    )}
-                    <span className="text-gray-500">
-                      {creatorUser?.name || "Usuario desconocido"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Asignado a */}
-                <div className="flex items-start">
-                  <span className="text-gray-500 w-28">Asignado a:</span>
-                  {editingField === "assigned_to_id" ? (
-                    <select
-                      value={fieldValue}
-                      autoFocus
-                      onChange={handleFieldChange}
-                      onBlur={() => handleFieldBlur("assigned_to_id")}
-                      onKeyDown={(e) => handleFieldKeyDown(e, "assigned_to_id")}
-                      className="px-3 py-1 border border-gray-300 rounded-md shadow-sm"
-                      disabled={savingField}
-                    >
-                      <option value="">Sin asignar</option>
-                      {users.map((user) => (
-                        <option key={user.id} value={user.id}>
-                          {user.name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div
-                      className="flex items-center cursor-pointer"
-                      onClick={() =>
-                        handleFieldClick("assigned_to_id", issue.assigned_to_id)
-                      }
-                      title="Haz click para editar"
-                    >
-                      {assignedUser ? (
-                        <>
-                          {assignedUser.avatar_url ? (
-                            <img
-                              src={assignedUser.avatar_url}
-                              alt={assignedUser.name}
-                              width={24}
-                              height={24}
-                              className="rounded-full mr-2"
-                            />
-                          ) : (
-                            <div className="w-6 h-6 bg-gray-300 rounded-full mr-2"></div>
-                          )}
-                          <span className="text-gray-500">
-                            {assignedUser.name}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-gray-500">Sin asignar</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Fechas */}
-                <div className="flex items-start">
-                  <span className="text-gray-500 w-28">Creado:</span>
-                  <span className="text-gray-500">
-                    {format(new Date(issue.created_at), "dd MMM yyyy HH:mm", {
-                      locale: es,
-                    })}
-                  </span>
-                </div>
-
-                {/* Fecha límite */}
-                <div className="flex items-start">
-                  <span className="text-gray-500 w-28">Fecha límite:</span>
-                  {editingField === "due_date" ? (
-                    <input
-                      type="date"
-                      value={fieldValue || ""}
-                      autoFocus
-                      onChange={handleFieldChange}
-                      onBlur={() => handleFieldBlur("due_date")}
-                      onKeyDown={(e) => handleFieldKeyDown(e, "due_date")}
-                      className="px-3 py-1 border border-gray-300 rounded-md shadow-sm"
-                      disabled={savingField}
-                    />
-                  ) : (
-                    <span
-                      className="cursor-pointer text-gray-500"
-                      onClick={() =>
-                        handleFieldClick("due_date", issue.due_date)
-                      }
-                      title="Haz click para editar"
-                    >
-                      {issue.due_date ? (
-                        format(new Date(issue.due_date), "dd MMM yyyy", {
-                          locale: es,
-                        })
-                      ) : (
-                        <span className="text-gray-500">Sin fecha</span>
-                      )}
-                    </span>
-                  )}
-                </div>
-                {/* Motivo fecha límite */}
-                {issue.due_date && (
-                  <div className="flex items-start">
-                    <span className="text-gray-500 w-28">Motivo:</span>
-                    {editingField === "due_date_reason" ? (
-                      <input
-                        type="text"
-                        value={fieldValue || ""}
-                        autoFocus
-                        onChange={handleFieldChange}
-                        onBlur={() => handleFieldBlur("due_date_reason")}
-                        onKeyDown={(e) =>
-                          handleFieldKeyDown(e, "due_date_reason")
-                        }
-                        placeholder="Motivo de la fecha límite"
-                        className="px-3 py-1 border border-gray-300 rounded-md shadow-sm"
-                        disabled={savingField}
-                      />
-                    ) : (
-                      <span
-                        className="cursor-pointer text-gray-500"
-                        onClick={() =>
-                          handleFieldClick(
-                            "due_date_reason",
-                            issue.due_date_reason
-                          )
-                        }
-                        title="Haz click para editar"
-                      >
-                        {issue.due_date_reason || (
-                          <span className="text-gray-500">Sin motivo</span>
-                        )}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
+          {/* Attachments */}
+          <div className="issuepage-attachments">
+            <div className="issuepage-attachments-header">
+              <b>{issue.attachments?.length || 0} Attachments</b>
+              <button className="issuepage-attachments-add">+</button>
             </div>
-
-            {/* Adjuntos */}
-            <div>
-              <h3 className="text-black font-semibold mb-3">
-                Adjuntos ({issue.attachments?.length || 0})
-              </h3>
-              {issue.attachments && issue.attachments.length > 0 ? (
-                <div className="space-y-2">
-                  {issue.attachments.map((attachment) => (
-                    <div key={attachment.id} className="flex items-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2 text-gray-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                        />
-                      </svg>
+            <table className="issuepage-attachments-table">
+              <tbody>
+                {issue.attachments?.map((a) => (
+                  <tr key={a.id} className="issuepage-attachment-list-item">
+                    <td>
+                      <span className="issuepage-attachment-icon">📎</span>
                       <a
-                        href={attachment.url}
+                        href={a.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline"
+                        className="issuepage-attachment-size"
                       >
-                        {attachment.filename}
+                        {a.filename}
                       </a>
-                      <span className="text-xs text-gray-500 ml-2">
-                        ({Math.round(attachment.byte_size / 1024)} KB)
+                    </td>
+                    <td className="issuepage-attachment-size">
+                      {(a.byte_size / 1024).toFixed(1)} KB
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Comments */}
+          <div className="issuepage-comments">
+            <div className="issuepage-comments-header">
+              <b>{comments.length} Comments</b>
+            </div>
+            <form
+              onSubmit={handleAddComment}
+              className="issuepage-comment-form"
+            >
+              <input
+                className="issuepage-comment-input"
+                placeholder="Type a new comment here"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                disabled={submitting}
+              />
+              <button
+                type="submit"
+                className="issuepage-comment-submit-button"
+                disabled={submitting}
+              >
+                {submitting ? "Enviando..." : "Agregar comentario"}
+              </button>
+            </form>
+            <div className="issuepage-comments-list">
+              {comments.map((comment) => {
+                const user = users.find((u) => u.id === comment.user_id);
+                return (
+                  <div key={comment.id} className="issuepage-comment">
+                    <div className="issuepage-comment-meta">
+                      {user?.avatar_url && (
+                        <img
+                          src={user.avatar_url}
+                          alt={user.name}
+                          className="issuepage-comment-avatar"
+                        />
+                      )}
+                      <span>{user?.name || "Usuario"}</span>
+                      <span className="issuepage-comment-date">
+                        {format(
+                          new Date(comment.created_at),
+                          "dd MMM yyyy HH:mm",
+                          { locale: es }
+                        )}
                       </span>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500">Sin adjuntos</p>
-              )}
+                    <div className="issuepage-comment-body">
+                      {comment.content}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Comentarios */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div className="p-6">
-          <h3 className="text-black font-semibold mb-3">Comentarios</h3>
-          <form onSubmit={handleAddComment} className="mb-4">
-            <textarea
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm mb-2"
-              placeholder="Escribe un comentario..."
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              rows={3}
-              disabled={submitting}
-            />
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              disabled={submitting}
-            >
-              {submitting ? "Enviando..." : "Agregar comentario"}
-            </button>
-          </form>
-          <div>
-            {comments.length === 0 && (
-              <p className="text-gray-500">Sin comentarios</p>
-            )}
-            {comments.map((comment) => {
-              const user = users.find((u) => u.id === comment.user_id);
-              return (
-                <div key={comment.id} className="mb-4 border-b pb-2">
-                  <div className="flex items-center mb-1">
-                    {user?.avatar_url ? (
-                      <img
-                        src={user.avatar_url}
-                        alt={user.name}
-                        width={20}
-                        height={20}
-                        className="rounded-full mr-2"
-                      />
-                    ) : (
-                      <div className="w-5 h-5 bg-gray-300 rounded-full mr-2"></div>
-                    )}
-                    <span className="font-semibold">
-                      {user?.name || "Usuario"}
-                    </span>
-                    <span className="ml-2 text-xs text-gray-500">
-                      {format(
-                        new Date(comment.created_at),
-                        "dd MMM yyyy HH:mm",
-                        {
-                          locale: es,
-                        }
-                      )}
-                    </span>
-                  </div>
-                  <div className="ml-7">{comment.body}</div>
-                </div>
-              );
-            })}
+        {/* SIDEBAR */}
+        <aside className="issuepage-sidebar">
+          <div className="issuepage-status">
+            <span className="issuepage-status-main">
+              {issue.status?.name?.toUpperCase() || "OPEN"}
+            </span>
           </div>
-        </div>
+          <div className="issuepage-sidebar-section">
+            <div className="issuepage-sidebar-label">type</div>
+            <div className="issuepage-sidebar-value">
+              {issue.issue_type?.name}
+              <span
+                className="issuepage-sidebar-dot"
+                style={{ background: issue.issue_type?.color }}
+              ></span>
+            </div>
+          </div>
+          <div className="issuepage-sidebar-section">
+            <div className="issuepage-sidebar-label">severity</div>
+            <div className="issuepage-sidebar-value">
+              {issue.severity?.name}
+              <span
+                className="issuepage-sidebar-dot"
+                style={{ background: issue.severity?.color }}
+              ></span>
+            </div>
+          </div>
+          <div className="issuepage-sidebar-section">
+            <div className="issuepage-sidebar-label">priority</div>
+            <div className="issuepage-sidebar-value">
+              {issue.priority?.name}
+              <span
+                className="issuepage-sidebar-dot"
+                style={{ background: issue.priority?.color }}
+              ></span>
+            </div>
+          </div>
+          <div className="issuepage-sidebar-section">
+            <div className="issuepage-sidebar-label">ASSIGNED</div>
+            {assignedUser && (
+              <div className="issuepage-sidebar-assigned">
+                <img
+                  src={assignedUser.avatar_url}
+                  className="issuepage-sidebar-avatar"
+                />
+                <span>{assignedUser.name}</span>
+              </div>
+            )}
+            <div className="issuepage-sidebar-buttons">
+              <button className="issuepage-sidebar-btn">+ Add assigned</button>
+              <button className="issuepage-sidebar-btn">Assign to me</button>
+            </div>
+          </div>
+          <div className="issuepage-sidebar-section">
+            <div className="issuepage-sidebar-label">WATCHERS</div>
+            {/* Aquí iría la lista de watchers */}
+          </div>
+        </aside>
       </div>
     </div>
   );
