@@ -5,6 +5,7 @@ import IssuesIndexPage from "../molecules/IssuesIndexPage";
 import ShowIssuePage from "../molecules/ShowIssuePage";
 import NewIssuePage from "../molecules/NewIssuePage";
 import UserProfilePage from "../molecules/UserProfilePage";
+import EditProfilePage from "../molecules/EditProfilePage";
 
 export default function AppNavigator() {
   const [currentScreen, setCurrentScreen] = useState("UserProfile");
@@ -29,6 +30,8 @@ export default function AppNavigator() {
         return <NewIssuePage navigate={navigate} />;
       case "UserProfile":
         return <UserProfilePage userId={2} navigate={navigate} />;
+      case "EditProfile":
+        return <EditProfilePage userId={screenParams.userId} navigate={navigate} />;
       default:
         return <IssuesIndexPage navigate={navigate} />;
     }
