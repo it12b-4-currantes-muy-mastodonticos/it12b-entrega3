@@ -512,34 +512,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
               </span>
             </div>
           )}
-          <button
-            type="button"
-            onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-            className="status-dropdown"
-            style={{ backgroundColor: getSelectedStatus()?.color || "#70728f" }}
-          >
-            <span>{getSelectedStatus()?.name || "Estado"}</span>
-            <svg className="icon-arrow" viewBox="0 0 20 20">
-              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-            </svg>
-          </button>
-
-          {showStatusDropdown && (
-            <div className="dropdown">
-              <ul>
-                {statuses.map((status) => (
-                  <li
-                    key={status.id}
-                    onClick={() => handleStatusSelect(status.id)}
-                  >
-                    <div className="dropdown-item">
-                      <span>{status.name}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
 
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">type</div>
