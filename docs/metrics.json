@@ -76,7 +76,7 @@
     },
     "pull_requests": {
         "created": {
-            "AlejandroComadran": 2,
+            "AlejandroComadran": 3,
             "alexcantarero": 4,
             "MarkitusHD97": 0,
             "nataliayikewang": 2
@@ -90,7 +90,7 @@
         "merged": 6,
         "not_merged_by_author": 2,
         "closed": 2,
-        "total": 8
+        "total": 9
     },
     "project": {
         "assigned_per_member": {
