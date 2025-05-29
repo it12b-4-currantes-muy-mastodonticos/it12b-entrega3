@@ -32,14 +32,15 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const [showDueDateModal, setShowDueDateModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-
   // Select options
   const [priorities, setPriorities] = useState([]);
   const [severities, setSeverities] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [types, setTypes] = useState([]);
   const [dueDateValue, setDueDateValue] = useState(issue?.due_date || "");
-  const [dueDateReasonValue, setDueDateReasonValue] = useState(issue?.due_date_reason || "");
+  const [dueDateReasonValue, setDueDateReasonValue] = useState(
+    issue?.due_date_reason || ""
+  );
 
   const fileInputRef = useRef(null);
   const [files, setFiles] = useState([]);
@@ -182,7 +183,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const setQuickDate = (days) => {
     const date = new Date();
     date.setDate(date.getDate() + days);
-    setDueDateValue(date.toISOString().split('T')[0]);
+    setDueDateValue(date.toISOString().split("T")[0]);
   };
 
   const handleDeleteDueDate = () => {
@@ -217,7 +218,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
       setSavingField(false);
     }
   };
-
 
   const handleFieldChange = (e) => {
     setFieldValue(e.target.value);
@@ -576,6 +576,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
         {/* SIDEBAR */}
         <aside className="issuepage-sidebar">
+          {/* SITATUS */}
           {editingField === "status_id" ? (
             <>
               <button
@@ -652,7 +653,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   onClick={() => setShowTypeDropdown(!showTypeDropdown)}
                   className="issuepage-sidebar-value issuepage-status-main"
                   style={{
-                    color: "#fff",
+                    color: "#000",
                     width: "100%",
                     textAlign: "left",
                   }}
@@ -708,10 +709,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   onClick={() => setShowSeverityDropdown(!showSeverityDropdown)}
                   className="issuepage-sidebar-value issuepage-status-main"
                   style={{
-                    backgroundColor:
-                      severities.find((s) => s.id === parseInt(fieldValue))
-                        ?.color || "#70728f",
-                    color: "#fff",
+                    color: "#000",
                     width: "100%",
                     textAlign: "left",
                   }}
@@ -766,10 +764,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   onClick={() => setShowPriorityDropdown(!showPriorityDropdown)}
                   className="issuepage-sidebar-value issuepage-status-main"
                   style={{
-                    backgroundColor:
-                      priorities.find((p) => p.id === parseInt(fieldValue))
-                        ?.color || "#70728f",
-                    color: "#fff",
+                    color: "#000",
                     width: "100%",
                     textAlign: "left",
                   }}
@@ -833,36 +828,49 @@ export default function ShowIssuePage({ issueId, navigate }) {
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">WATCHERS</div>
             {/* Aquí iría la lista de watchers */}
-              <div className="issuepage-sidebar-label">DUE DATE</div>
-              {issue.due_date ? (
-                <div className="issuepage-sidebar-due-date">
-                  <div className="issuepage-sidebar-date-value">
-                    {format(new Date(issue.due_date), "dd MMM yyyy", { locale: es })}
-                  </div>
-                  {issue.due_date_reason && (
-                    <div className="issuepage-sidebar-date-reason">
-                      {issue.due_date_reason}
-                    </div>
-                  )}
-                  <button 
-                    className="issuepage-sidebar-btn" 
-                    onClick={handleOpenDueDateModal}
-                  >
-                    Editar fecha
-                  </button>
+            <div className="issuepage-sidebar-label">DUE DATE</div>
+            {issue.due_date ? (
+              <div className="issuepage-sidebar-due-date">
+                <div className="issuepage-sidebar-date-value">
+                  {format(new Date(issue.due_date), "dd MMM yyyy", {
+                    locale: es,
+                  })}
                 </div>
-              ) : (
-                <button 
-                  className="issuepage-sidebar-btn" 
+                {issue.due_date_reason && (
+                  <div className="issuepage-sidebar-date-reason">
+                    {issue.due_date_reason}
+                  </div>
+                )}
+                <button
+                  className="issuepage-sidebar-btn"
                   onClick={handleOpenDueDateModal}
                 >
-                  <svg viewBox="0 0 24 24" className="calendar-icon" width="18" height="18">
-                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
-                      stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Set due date
+                  Editar fecha
                 </button>
-              )}
+              </div>
+            ) : (
+              <button
+                className="issuepage-sidebar-btn"
+                onClick={handleOpenDueDateModal}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="calendar-icon"
+                  width="18"
+                  height="18"
+                >
+                  <path
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Set due date
+              </button>
+            )}
           </div>
         </aside>
       </div>
@@ -872,62 +880,78 @@ export default function ShowIssuePage({ issueId, navigate }) {
           <div className="issuepage-due-date-modal">
             <div className="issuepage-modal-header">
               <h2>Set due date</h2>
-              <button 
-                className="issuepage-modal-close" 
+              <button
+                className="issuepage-modal-close"
                 onClick={() => setShowDueDateModal(false)}
               >
                 <svg viewBox="0 0 24 24" width="24" height="24">
-                  <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2"/>
+                  <path
+                    d="M6 18L18 6M6 6l12 12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
                 </svg>
               </button>
             </div>
             <div className="issuepage-modal-content">
               <div className="issuepage-date-picker">
-                <input 
-                  type="date" 
-                  value={dueDateValue} 
-                  onChange={(e) => setDueDateValue(e.target.value)} 
+                <input
+                  type="date"
+                  value={dueDateValue}
+                  onChange={(e) => setDueDateValue(e.target.value)}
                   className="issuepage-date-input"
                   placeholder="Select date"
                 />
               </div>
-              
+
               <div className="issuepage-quick-dates">
-                <button onClick={() => setQuickDate(7)} className="issuepage-quick-date-btn">
+                <button
+                  onClick={() => setQuickDate(7)}
+                  className="issuepage-quick-date-btn"
+                >
                   In one week
                 </button>
-                <button onClick={() => setQuickDate(14)} className="issuepage-quick-date-btn">
+                <button
+                  onClick={() => setQuickDate(14)}
+                  className="issuepage-quick-date-btn"
+                >
                   In two weeks
                 </button>
-                <button onClick={() => setQuickDate(30)} className="issuepage-quick-date-btn">
+                <button
+                  onClick={() => setQuickDate(30)}
+                  className="issuepage-quick-date-btn"
+                >
                   In one month
                 </button>
-                <button onClick={() => setQuickDate(90)} className="issuepage-quick-date-btn">
+                <button
+                  onClick={() => setQuickDate(90)}
+                  className="issuepage-quick-date-btn"
+                >
                   In three months
                 </button>
               </div>
-              
+
               <div className="issuepage-due-date-reason">
                 <h3>Reason for the due date</h3>
-                <textarea 
-                  value={dueDateReasonValue} 
-                  onChange={(e) => setDueDateReasonValue(e.target.value)} 
+                <textarea
+                  value={dueDateReasonValue}
+                  onChange={(e) => setDueDateReasonValue(e.target.value)}
                   className="issuepage-reason-textarea"
                   placeholder="Why does this issue need a due date?"
                 />
               </div>
             </div>
             <div className="issuepage-modal-footer">
-              <button 
-                className="issuepage-modal-save" 
+              <button
+                className="issuepage-modal-save"
                 onClick={handleSaveDueDate}
                 disabled={savingField}
               >
                 {savingField ? "Saving..." : "SAVE"}
               </button>
               {issue.due_date && (
-                <button 
-                  className="issuepage-modal-delete" 
+                <button
+                  className="issuepage-modal-delete"
                   onClick={handleDeleteDueDate}
                   disabled={savingField}
                 >
@@ -942,7 +966,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
         </div>
       )}
 
-
       {showDeleteConfirm && (
         <div className="issuepage-delete-confirm-overlay">
           <div className="issuepage-delete-confirm">
@@ -953,14 +976,14 @@ export default function ShowIssuePage({ issueId, navigate }) {
               <p>¿Are you sure you want to delete this due date?</p>
             </div>
             <div className="issuepage-delete-confirm-actions">
-              <button 
-                className="issuepage-delete-confirm-cancel" 
+              <button
+                className="issuepage-delete-confirm-cancel"
                 onClick={() => setShowDeleteConfirm(false)}
               >
                 Cancelar
               </button>
-              <button 
-                className="issuepage-delete-confirm-confirm" 
+              <button
+                className="issuepage-delete-confirm-confirm"
                 onClick={confirmDeleteDueDate}
                 disabled={savingField}
               >
@@ -970,7 +993,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
           </div>
         </div>
       )}
-
     </div>
   );
 }
