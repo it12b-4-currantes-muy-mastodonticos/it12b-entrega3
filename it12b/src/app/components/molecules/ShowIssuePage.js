@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -985,16 +986,17 @@ export default function ShowIssuePage({ issueId, navigate }) {
             </div>
             <div className="issuepage-sidebar-label">DUE DATE</div>
             {issue.due_date ? (
-              <div className="issuepage-sidebar-due-date">
-                <div className="issuepage-sidebar-date-value">
-                  {format(new Date(issue.due_date), "dd MMM yyyy", {
-                    locale: es,
-                  })}
-                </div>
-                {issue.due_date_reason && (
-                  <div className="issuepage-sidebar-date-reason">
-                    {issue.due_date_reason}
+              <>
+                <div className="issuepage-sidebar-due-date">
+                  <div className="issuepage-sidebar-date-value">
+                    {format(new Date(issue.due_date), "dd MMM yyyy", {
+                      locale: es,
+                    })}
                   </div>
+                  {issue.due_date_reason && (
+                    <div className="issuepage-sidebar-date-reason">
+                      {issue.due_date_reason}
+                    </div>
                   )}
                   <button 
                     className={`issuepage-sidebar-btn ${isIssueClosed() ? "issuepage-btn-disabled" : ""}`} 
@@ -1004,7 +1006,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                     Edit due date
                   </button>
                 </div>
-              </div>
+              </>
             ) : (
               <button
                 className="issuepage-sidebar-btn"
