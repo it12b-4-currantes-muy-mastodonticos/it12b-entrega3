@@ -45,7 +45,7 @@
 .issuepage-comment-date { margin-left: auto; font-size: 0.85rem; }
 .issuepage-comment-body { margin-left: 2.2rem; color: #898f8e }
 .issuepage-comment-form { padding: 1rem; border-top: 1px solid #e5e7eb; }
-.issuepage-comment-input { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 3px; color: #5f6a72; }
+.issuepage-comment-input { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 3px; color: #5f6a72; height: 100px;}
 .issuepage-comment-submit-button { background-color: #1eeeaf;
   color: #2b393a;            /* text-white */
   padding-left: 1rem;     

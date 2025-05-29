@@ -370,6 +370,25 @@ export default function ShowIssuePage({ issueId, navigate }) {
             <div className="issuepage-comments-header">
               <b>{comments.length} Comments</b>
             </div>
+            <form
+              onSubmit={handleAddComment}
+              className="issuepage-comment-form"
+            >
+              <input
+                className="issuepage-comment-input"
+                placeholder="Type a new comment here"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                disabled={submitting}
+              />
+              <button
+                type="submit"
+                className="issuepage-comment-submit-button"
+                disabled={submitting}
+              >
+                {submitting ? "Enviando..." : "Agregar comentario"}
+              </button>
+            </form>
             <div className="issuepage-comments-list">
               {comments.map((comment) => {
                 const user = users.find((u) => u.id === comment.user_id);
@@ -399,25 +418,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 );
               })}
             </div>
-            <form
-              onSubmit={handleAddComment}
-              className="issuepage-comment-form"
-            >
-              <input
-                className="issuepage-comment-input"
-                placeholder="Type a new comment here"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                disabled={submitting}
-              />
-              <button
-                type="submit"
-                className="issuepage-comment-submit-button"
-                disabled={submitting}
-              >
-                {submitting ? "Enviando..." : "Agregar comentario"}
-              </button>
-            </form>
           </div>
         </div>
 
