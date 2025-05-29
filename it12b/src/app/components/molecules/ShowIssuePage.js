@@ -38,14 +38,15 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const [showDueDateModal, setShowDueDateModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-
   // Select options
   const [priorities, setPriorities] = useState([]);
   const [severities, setSeverities] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [types, setTypes] = useState([]);
   const [dueDateValue, setDueDateValue] = useState(issue?.due_date || "");
-  const [dueDateReasonValue, setDueDateReasonValue] = useState(issue?.due_date_reason || "");
+  const [dueDateReasonValue, setDueDateReasonValue] = useState(
+    issue?.due_date_reason || ""
+  );
 
   const fileInputRef = useRef(null);
   const [files, setFiles] = useState([]);
@@ -198,7 +199,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const setQuickDate = (days) => {
     const date = new Date();
     date.setDate(date.getDate() + days);
-    setDueDateValue(date.toISOString().split('T')[0]);
+    setDueDateValue(date.toISOString().split("T")[0]);
   };
 
   const handleDeleteDueDate = () => {
@@ -234,16 +235,15 @@ export default function ShowIssuePage({ issueId, navigate }) {
     }
   };
 
-
   const handleFieldChange = (e) => {
     setFieldValue(e.target.value);
   };
 
   const handleFileChange = (e) => {
-  if (e.target.files && e.target.files.length > 0) {
-    setFiles(prev => [...prev, ...Array.from(e.target.files)]);
-  }
-};
+    if (e.target.files && e.target.files.length > 0) {
+      setFiles((prev) => [...prev, ...Array.from(e.target.files)]);
+    }
+  };
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -317,7 +317,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
       formData.append("issue[attachments][]", file);
     });
 
-
     try {
       const updatedIssue = await updateIssue(issueId, formData);
       return updatedIssue;
@@ -330,16 +329,16 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const deleteAttachments = async (at) => {
     try {
       setSavingField(true);
-      const attachment = issue.attachments.find(a => a.id === at);
+      const attachment = issue.attachments.find((a) => a.id === at);
       if (!attachment) {
         throw new Error("Attachment not found");
       }
-      
+
       await deleteAttachment(issueId, attachment.blob_id);
-      
-      setIssue(prevIssue => ({
+
+      setIssue((prevIssue) => ({
         ...prevIssue,
-        attachments: prevIssue.attachments.filter(a => a.id !== at)
+        attachments: prevIssue.attachments.filter((a) => a.id !== at),
       }));
     } catch (error) {
       console.error("Error deleting attachment:", error);
@@ -536,22 +535,21 @@ export default function ShowIssuePage({ issueId, navigate }) {
             <div className="issuepage-attachments-header">
               <b>{issue.attachments?.length || 0} Attachments</b>
               <div className="issuepage-attachments-add">
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
-                  className="issuepage-file-input" 
-                  multiple 
+                  className="issuepage-file-input"
+                  multiple
                 />
                 <button
                   type="button"
                   onClick={triggerFileInput}
                   className="issuepage-attachments-add"
                 >
-                +
+                  +
                 </button>
               </div>
-
             </div>
             <table className="issuepage-attachments-table">
               <tbody>
@@ -572,8 +570,8 @@ export default function ShowIssuePage({ issueId, navigate }) {
                       {(a.byte_size / 1024).toFixed(1)} KB
                     </td>
                     <td>
-                      <button 
-                        className="issuepage-attachment-delete" 
+                      <button
+                        className="issuepage-attachment-delete"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -582,8 +580,14 @@ export default function ShowIssuePage({ issueId, navigate }) {
                         disabled={savingField}
                       >
                         <svg viewBox="0 0 24 24" width="16" height="16">
-                          <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
-                            stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
                         </svg>
                       </button>
                     </td>
@@ -733,7 +737,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   onClick={() => setShowTypeDropdown(!showTypeDropdown)}
                   className="issuepage-sidebar-value issuepage-status-main"
                   style={{
-                    color: "#fff",
+                    color: "#000",
                     width: "100%",
                     textAlign: "left",
                   }}
@@ -789,10 +793,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   onClick={() => setShowSeverityDropdown(!showSeverityDropdown)}
                   className="issuepage-sidebar-value issuepage-status-main"
                   style={{
-                    backgroundColor:
-                      severities.find((s) => s.id === parseInt(fieldValue))
-                        ?.color || "#70728f",
-                    color: "#fff",
+                    color: "#000",
                     width: "100%",
                     textAlign: "left",
                   }}
@@ -847,10 +848,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   onClick={() => setShowPriorityDropdown(!showPriorityDropdown)}
                   className="issuepage-sidebar-value issuepage-status-main"
                   style={{
-                    backgroundColor:
-                      priorities.find((p) => p.id === parseInt(fieldValue))
-                        ?.color || "#70728f",
-                    color: "#fff",
+                    color: "#000",
                     width: "100%",
                     textAlign: "left",
                   }}
@@ -917,10 +915,15 @@ export default function ShowIssuePage({ issueId, navigate }) {
               {watchers.length > 0 ? (
                 watchers.map((watcherId) => {
                   console.log("Watcher ID:", watcherId);
-                  const watcher = users.find((user) => user.id === watcherId.id);
+                  const watcher = users.find(
+                    (user) => user.id === watcherId.id
+                  );
                   console.log("Watcher:", watcher);
                   return (
-                    <div key={watcherId.id} className="issuepage-sidebar-watcher hover:text-[#008aa8] relative group flex items-center gap-2">
+                    <div
+                      key={watcherId.id}
+                      className="issuepage-sidebar-watcher hover:text-[#008aa8] relative group flex items-center gap-2"
+                    >
                       {watcher?.avatar_url && (
                         <img
                           src={watcher.avatar_url}
@@ -934,7 +937,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
                         onClick={async () => {
                           try {
                             await removeWatcherFromIssue(issueId, watcherId.id);
-                            const updatedWatchers = await getWatchersByIssueId(issueId);
+                            const updatedWatchers = await getWatchersByIssueId(
+                              issueId
+                            );
                             setWatchers(updatedWatchers);
                           } catch (error) {
                             console.error("Error removing watcher:", error);
@@ -957,41 +962,58 @@ export default function ShowIssuePage({ issueId, navigate }) {
               >
                 + Add watchers
               </button>
-              <button className="issuepage-sidebar-btn text-gray-500"
-                      onClick={handleWatchToggle}>
-                      {watchers.some((watcher) => watcher.id === currentUser?.id) ? "👁 Unwatch" : "👁 Watch"}
+              <button
+                className="issuepage-sidebar-btn text-gray-500"
+                onClick={handleWatchToggle}
+              >
+                {watchers.some((watcher) => watcher.id === currentUser?.id)
+                  ? "👁 Unwatch"
+                  : "👁 Watch"}
               </button>
             </div>
-              <div className="issuepage-sidebar-label">DUE DATE</div>
-              {issue.due_date ? (
-                <div className="issuepage-sidebar-due-date">
-                  <div className="issuepage-sidebar-date-value">
-                    {format(new Date(issue.due_date), "dd MMM yyyy", { locale: es })}
-                  </div>
-                  {issue.due_date_reason && (
-                    <div className="issuepage-sidebar-date-reason">
-                      {issue.due_date_reason}
-                    </div>
-                  )}
-                  <button 
-                    className="issuepage-sidebar-btn" 
-                    onClick={handleOpenDueDateModal}
-                  >
-                    Editar fecha
-                  </button>
+            <div className="issuepage-sidebar-label">DUE DATE</div>
+            {issue.due_date ? (
+              <div className="issuepage-sidebar-due-date">
+                <div className="issuepage-sidebar-date-value">
+                  {format(new Date(issue.due_date), "dd MMM yyyy", {
+                    locale: es,
+                  })}
                 </div>
-              ) : (
-                <button 
-                  className="issuepage-sidebar-btn" 
+                {issue.due_date_reason && (
+                  <div className="issuepage-sidebar-date-reason">
+                    {issue.due_date_reason}
+                  </div>
+                )}
+                <button
+                  className="issuepage-sidebar-btn"
                   onClick={handleOpenDueDateModal}
                 >
-                  <svg viewBox="0 0 24 24" className="calendar-icon" width="18" height="18">
-                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
-                      stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Set due date
+                  Editar fecha
                 </button>
-              )}
+              </div>
+            ) : (
+              <button
+                className="issuepage-sidebar-btn"
+                onClick={handleOpenDueDateModal}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="calendar-icon"
+                  width="18"
+                  height="18"
+                >
+                  <path
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Set due date
+              </button>
+            )}
           </div>
         </aside>
       </div>
@@ -1001,62 +1023,78 @@ export default function ShowIssuePage({ issueId, navigate }) {
           <div className="issuepage-due-date-modal">
             <div className="issuepage-modal-header">
               <h2>Set due date</h2>
-              <button 
-                className="issuepage-modal-close" 
+              <button
+                className="issuepage-modal-close"
                 onClick={() => setShowDueDateModal(false)}
               >
                 <svg viewBox="0 0 24 24" width="24" height="24">
-                  <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2"/>
+                  <path
+                    d="M6 18L18 6M6 6l12 12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
                 </svg>
               </button>
             </div>
             <div className="issuepage-modal-content">
               <div className="issuepage-date-picker">
-                <input 
-                  type="date" 
-                  value={dueDateValue} 
-                  onChange={(e) => setDueDateValue(e.target.value)} 
+                <input
+                  type="date"
+                  value={dueDateValue}
+                  onChange={(e) => setDueDateValue(e.target.value)}
                   className="issuepage-date-input"
                   placeholder="Select date"
                 />
               </div>
-              
+
               <div className="issuepage-quick-dates">
-                <button onClick={() => setQuickDate(7)} className="issuepage-quick-date-btn">
+                <button
+                  onClick={() => setQuickDate(7)}
+                  className="issuepage-quick-date-btn"
+                >
                   In one week
                 </button>
-                <button onClick={() => setQuickDate(14)} className="issuepage-quick-date-btn">
+                <button
+                  onClick={() => setQuickDate(14)}
+                  className="issuepage-quick-date-btn"
+                >
                   In two weeks
                 </button>
-                <button onClick={() => setQuickDate(30)} className="issuepage-quick-date-btn">
+                <button
+                  onClick={() => setQuickDate(30)}
+                  className="issuepage-quick-date-btn"
+                >
                   In one month
                 </button>
-                <button onClick={() => setQuickDate(90)} className="issuepage-quick-date-btn">
+                <button
+                  onClick={() => setQuickDate(90)}
+                  className="issuepage-quick-date-btn"
+                >
                   In three months
                 </button>
               </div>
-              
+
               <div className="issuepage-due-date-reason">
                 <h3>Reason for the due date</h3>
-                <textarea 
-                  value={dueDateReasonValue} 
-                  onChange={(e) => setDueDateReasonValue(e.target.value)} 
+                <textarea
+                  value={dueDateReasonValue}
+                  onChange={(e) => setDueDateReasonValue(e.target.value)}
                   className="issuepage-reason-textarea"
                   placeholder="Why does this issue need a due date?"
                 />
               </div>
             </div>
             <div className="issuepage-modal-footer">
-              <button 
-                className="issuepage-modal-save" 
+              <button
+                className="issuepage-modal-save"
                 onClick={handleSaveDueDate}
                 disabled={savingField}
               >
                 {savingField ? "Saving..." : "SAVE"}
               </button>
               {issue.due_date && (
-                <button 
-                  className="issuepage-modal-delete" 
+                <button
+                  className="issuepage-modal-delete"
                   onClick={handleDeleteDueDate}
                   disabled={savingField}
                 >
@@ -1071,7 +1109,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
         </div>
       )}
 
-
       {showDeleteConfirm && (
         <div className="issuepage-delete-confirm-overlay">
           <div className="issuepage-delete-confirm">
@@ -1082,14 +1119,14 @@ export default function ShowIssuePage({ issueId, navigate }) {
               <p>¿Are you sure you want to delete this due date?</p>
             </div>
             <div className="issuepage-delete-confirm-actions">
-              <button 
-                className="issuepage-delete-confirm-cancel" 
+              <button
+                className="issuepage-delete-confirm-cancel"
                 onClick={() => setShowDeleteConfirm(false)}
               >
                 Cancelar
               </button>
-              <button 
-                className="issuepage-delete-confirm-confirm" 
+              <button
+                className="issuepage-delete-confirm-confirm"
                 onClick={confirmDeleteDueDate}
                 disabled={savingField}
               >
@@ -1101,70 +1138,75 @@ export default function ShowIssuePage({ issueId, navigate }) {
       )}
 
       {isModalOpen && (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          {/* Botón para cerrar el modal */}
-          <button
-            className="absolute top-10 right-10 bg-gray-100 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-400"
-            onClick={closeModal}
-            title="Close"
-          >
-            ✖
-          </button>
-          <h2 className="text-lg font-bold mb-4 text-gray-500 text-center">Add Watchers</h2>
-          <div className="modal-users-list text-gray-500">
-            {users
-              .filter((user) => !watchers.some((watcher) => watcher.id === user.id)) // Filtrar usuarios que no son watchers
-              .map((user) => {
-                const isSelected = selectedUsers.includes(user.id);
-              return (
-                <div
-                  key={user.id}
-                  className={`modal-user-item flex items-center gap-2 p-2 rounded-md cursor-pointer ${
-                    isSelected ? "bg-emerald-100 " : " hover:bg-gray-100"
-                  }`}
-                  onClick={() => {
-                    setSelectedUsers((prev) =>
-                      isSelected
-                        ? prev.filter((id) => id !== user.id) // Deselect
-                        : [...prev, user.id] // Select
-                    );
-                  }}
-                >
-                  <img
-                    src={user.avatar_url}
-                    alt={user.name}
-                    className="modal-user-avatar"
-                  />
-                  <span>{user.name}</span>
-                </div>
-              );
-            })}
-          </div>
-          <div className="modal-actions mt-4 flex justify-center">
+        <div className="modal-overlay">
+          <div className="modal-content">
+            {/* Botón para cerrar el modal */}
             <button
-              className="bg-[#83eede] text-gray-700 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
-              onClick={async () => {
-                try {
-                  await Promise.all(
-                    selectedUsers.map((userId) =>
-                      addWatcherToIssue(issueId, userId)
-                    )
-                  );
-                  const updatedWatchers = await getWatchersByIssueId(issueId);
-                  setWatchers(updatedWatchers);
-                  setSelectedUsers([]);
-                  closeModal();
-                } catch (error) {
-                  console.error("Error adding watchers:", error);
-                }
-              }}
+              className="absolute top-10 right-10 bg-gray-100 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-400"
+              onClick={closeModal}
+              title="Close"
             >
-              ADD
+              ✖
             </button>
+            <h2 className="text-lg font-bold mb-4 text-gray-500 text-center">
+              Add Watchers
+            </h2>
+            <div className="modal-users-list text-gray-500">
+              {users
+                .filter(
+                  (user) => !watchers.some((watcher) => watcher.id === user.id)
+                ) // Filtrar usuarios que no son watchers
+                .map((user) => {
+                  const isSelected = selectedUsers.includes(user.id);
+                  return (
+                    <div
+                      key={user.id}
+                      className={`modal-user-item flex items-center gap-2 p-2 rounded-md cursor-pointer ${
+                        isSelected ? "bg-emerald-100 " : " hover:bg-gray-100"
+                      }`}
+                      onClick={() => {
+                        setSelectedUsers(
+                          (prev) =>
+                            isSelected
+                              ? prev.filter((id) => id !== user.id) // Deselect
+                              : [...prev, user.id] // Select
+                        );
+                      }}
+                    >
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name}
+                        className="modal-user-avatar"
+                      />
+                      <span>{user.name}</span>
+                    </div>
+                  );
+                })}
+            </div>
+            <div className="modal-actions mt-4 flex justify-center">
+              <button
+                className="bg-[#83eede] text-gray-700 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
+                onClick={async () => {
+                  try {
+                    await Promise.all(
+                      selectedUsers.map((userId) =>
+                        addWatcherToIssue(issueId, userId)
+                      )
+                    );
+                    const updatedWatchers = await getWatchersByIssueId(issueId);
+                    setWatchers(updatedWatchers);
+                    setSelectedUsers([]);
+                    closeModal();
+                  } catch (error) {
+                    console.error("Error adding watchers:", error);
+                  }
+                }}
+              >
+                ADD
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   );
