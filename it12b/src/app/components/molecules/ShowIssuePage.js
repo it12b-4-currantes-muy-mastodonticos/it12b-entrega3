@@ -11,14 +11,18 @@ import {
   getSeverities,
   getStatuses,
   getTypes,
+  addWatcherToIssue,
+  getWatchersByIssueId,
+  removeWatcherFromIssue,
   deleteAttachment,
 } from "../../apiCall";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, se } from "date-fns/locale";
 import "./ShowIssuePage.css";
 import api from "../../axios.js";
 
 export default function ShowIssuePage({ issueId, navigate }) {
+  const [watchers, setWatchers] = useState([]);
   const [issue, setIssue] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +55,13 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const [showSeverityDropdown, setShowSeverityDropdown] = useState(false);
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
 
+  //watchers modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,6 +82,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
         const commentsData = await getCommentsByIssueId(issueId);
         setComments(commentsData);
+
+        const watchersData = await getWatchersByIssueId(issueId);
+        setWatchers(watchersData);
 
         const [prioritiesData, severitiesData, statusesData, typesData] =
           await Promise.all([
@@ -369,6 +383,29 @@ export default function ShowIssuePage({ issueId, navigate }) {
       console.error("Error adding comment:", error);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleWatchToggle = async () => {
+    if (!currentUser) {
+      alert("Debes estar logueado para observar esta issue.");
+      return;
+    }
+
+    try {
+      if (watchers.some((watcher) => watcher.id === currentUser.id)) {
+        // Si el usuario ya es watcher, eliminarlo
+        await removeWatcherFromIssue(issueId, currentUser.id);
+      } else {
+        // Si el usuario no es watcher, añadirlo
+        await addWatcherToIssue(issueId, currentUser.id);
+      }
+
+      // Actualizar la lista de watchers
+      const updatedWatchers = await getWatchersByIssueId(issueId);
+      setWatchers(updatedWatchers);
+    } catch (error) {
+      console.error("Error al cambiar el estado de watcher:", error);
     }
   };
 
@@ -876,7 +913,55 @@ export default function ShowIssuePage({ issueId, navigate }) {
           </div>
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">WATCHERS</div>
-            {/* Aquí iría la lista de watchers */}
+            <div className="issuepage-sidebar-watchers">
+              {watchers.length > 0 ? (
+                watchers.map((watcherId) => {
+                  console.log("Watcher ID:", watcherId);
+                  const watcher = users.find((user) => user.id === watcherId.id);
+                  console.log("Watcher:", watcher);
+                  return (
+                    <div key={watcherId.id} className="issuepage-sidebar-watcher hover:text-[#008aa8] relative group flex items-center gap-2">
+                      {watcher?.avatar_url && (
+                        <img
+                          src={watcher.avatar_url}
+                          alt={watcher.name}
+                          className="issuepage-sidebar-avatar"
+                        />
+                      )}
+                      <span>{watcher?.name || "Unknown User"}</span>
+                      <button
+                        className="absolute right-0 top-1/2 transform -translate-y-1/2 text-[#62626e] hidden group-hover:flex items-center justify-center w-6 h-6 text-white rounded-full hover:text-red-600"
+                        onClick={async () => {
+                          try {
+                            await removeWatcherFromIssue(issueId, watcherId.id);
+                            const updatedWatchers = await getWatchersByIssueId(issueId);
+                            setWatchers(updatedWatchers);
+                          } catch (error) {
+                            console.error("Error removing watcher:", error);
+                          }
+                        }}
+                      >
+                        ✖
+                      </button>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500"></p>
+              )}
+            </div>
+            <div className="issuepage-sidebar-buttons">
+              <button
+                className="issuepage-sidebar-btn text-gray-500"
+                onClick={openModal}
+              >
+                + Add watchers
+              </button>
+              <button className="issuepage-sidebar-btn text-gray-500"
+                      onClick={handleWatchToggle}>
+                      {watchers.some((watcher) => watcher.id === currentUser?.id) ? "👁 Unwatch" : "👁 Watch"}
+              </button>
+            </div>
               <div className="issuepage-sidebar-label">DUE DATE</div>
               {issue.due_date ? (
                 <div className="issuepage-sidebar-due-date">
@@ -1015,6 +1100,72 @@ export default function ShowIssuePage({ issueId, navigate }) {
         </div>
       )}
 
+      {isModalOpen && (
+      <div className="modal-overlay">
+        <div className="modal-content">
+          {/* Botón para cerrar el modal */}
+          <button
+            className="absolute top-10 right-10 bg-gray-100 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-400"
+            onClick={closeModal}
+            title="Close"
+          >
+            ✖
+          </button>
+          <h2 className="text-lg font-bold mb-4 text-gray-500 text-center">Add Watchers</h2>
+          <div className="modal-users-list text-gray-500">
+            {users
+              .filter((user) => !watchers.some((watcher) => watcher.id === user.id)) // Filtrar usuarios que no son watchers
+              .map((user) => {
+                const isSelected = selectedUsers.includes(user.id);
+              return (
+                <div
+                  key={user.id}
+                  className={`modal-user-item flex items-center gap-2 p-2 rounded-md cursor-pointer ${
+                    isSelected ? "bg-emerald-100 " : " hover:bg-gray-100"
+                  }`}
+                  onClick={() => {
+                    setSelectedUsers((prev) =>
+                      isSelected
+                        ? prev.filter((id) => id !== user.id) // Deselect
+                        : [...prev, user.id] // Select
+                    );
+                  }}
+                >
+                  <img
+                    src={user.avatar_url}
+                    alt={user.name}
+                    className="modal-user-avatar"
+                  />
+                  <span>{user.name}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="modal-actions mt-4 flex justify-center">
+            <button
+              className="bg-[#83eede] text-gray-700 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
+              onClick={async () => {
+                try {
+                  await Promise.all(
+                    selectedUsers.map((userId) =>
+                      addWatcherToIssue(issueId, userId)
+                    )
+                  );
+                  const updatedWatchers = await getWatchersByIssueId(issueId);
+                  setWatchers(updatedWatchers);
+                  setSelectedUsers([]);
+                  closeModal();
+                } catch (error) {
+                  console.error("Error adding watchers:", error);
+                }
+              }}
+            >
+              ADD
+            </button>
+          </div>
+        </div>
+      </div>
+      )}
     </div>
   );
 }
