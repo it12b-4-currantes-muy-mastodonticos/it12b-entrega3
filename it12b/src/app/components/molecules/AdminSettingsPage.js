@@ -9,19 +9,19 @@ import {
 } from "../../apiCall";
 
 export default function AdminSettingsPage({ navigate }) {
-  // Estados para cada categoría
+  // States for each category
   const [types, setTypes] = useState([]);
   const [severities, setSeverities] = useState([]);
   const [priorities, setPriorities] = useState([]);
   const [statuses, setStatuses] = useState([]);
   
-  // Estado para seguimiento de carga
+  // State for loading tracking
   const [loading, setLoading] = useState(true);
   
-  // Estado para el elemento que se está editando actualmente
+  // State for the element being edited currently
   const [editingItem, setEditingItem] = useState(null);
   
-  // Estado para elemento nuevo
+  // State for new element
   const [newItem, setNewItem] = useState({
     category: null, // 'type', 'severity', 'priority', 'status'
     name: '',
@@ -29,7 +29,7 @@ export default function AdminSettingsPage({ navigate }) {
     is_closed: false,
   });
 
-  // Estado para elemento de reemplazo (al eliminar)
+  // State for replacement element (when deleting)
   const [replacementItem, setReplacementItem] = useState({
     typeId: '',
     severityId: '',
@@ -37,13 +37,13 @@ export default function AdminSettingsPage({ navigate }) {
     statusId: '',
   });
 
-  // Estado para mostrar/ocultar formulario de nuevo elemento
+  // State to show/hide new item form
   const [showNewItemForm, setShowNewItemForm] = useState(false);
   
-  // Estado para errores
+  // State for errors
   const [error, setError] = useState(null);
 
-  // Cargar datos al inicio
+  // Load data on start
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -55,14 +55,22 @@ export default function AdminSettingsPage({ navigate }) {
           getStatuses()
         ]);
 
+        // Process the statuses to convert 'open' to 'is_closed'
+        const processedStatuses = statusesData.map(status => ({
+          ...status,
+          is_closed: !status.open, // Important: is_closed is the opposite of open
+        }));
+        
+        console.log('Processed statuses:', processedStatuses);
+
         setTypes(typesData);
         setSeverities(severitiesData);
         setPriorities(prioritiesData);
-        setStatuses(statusesData);
+        setStatuses(processedStatuses);
         setError(null);
       } catch (error) {
-        console.error("Error cargando datos de configuración:", error);
-        setError("Error cargando configuración. Por favor, intente de nuevo.");
+        console.error("Error loading configuration data:", error);
+        setError("Error loading configuration. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -71,7 +79,7 @@ export default function AdminSettingsPage({ navigate }) {
     fetchData();
   }, []);
 
-  // Manejar cambios en formulario de nuevo elemento o edición
+  // Handle changes in new item or editing form
   const handleItemChange = (e, isEditing = false) => {
     const { name, value, type, checked } = e.target;
     
@@ -88,7 +96,7 @@ export default function AdminSettingsPage({ navigate }) {
     }
   };
 
-  // Guardar un nuevo elemento
+  // Save a new element
   const handleSaveNewItem = async (e) => {
     e.preventDefault();
     
@@ -109,12 +117,27 @@ export default function AdminSettingsPage({ navigate }) {
           result = await createPriority(newItem);
           setPriorities([...priorities, result]);
           break;
-        case 'status':
-          result = await createStatus(newItem);
-          setStatuses([...statuses, result]);
+        case 'status': {
+          // Convert is_closed to open (which is the opposite)
+          const statusData = {
+            ...newItem,
+            open: !newItem.is_closed, // Important: open is the opposite of is_closed
+            is_closed: undefined // Remove the is_closed property
+          };
+          
+          result = await createStatus(statusData);
+          
+          // Make sure the result has is_closed for the local state
+          const processedResult = {
+            ...result,
+            is_closed: !result.open // Set is_closed as the opposite of open
+          };
+          
+          setStatuses([...statuses, processedResult]);
           break;
+        }
         default:
-          throw new Error("Categoría desconocida");
+          throw new Error("Unknown category");
       }
       
       // Reset form
@@ -126,15 +149,16 @@ export default function AdminSettingsPage({ navigate }) {
       });
       setShowNewItemForm(false);
       setError(null);
+      setShowModal(false);
     } catch (error) {
-      console.error("Error creando elemento:", error);
-      setError(`Error creando ${getCategoryDisplayName(newItem.category)}`);
+      console.error("Error creating element:", error);
+      setError(`Error creating ${getCategoryDisplayName(newItem.category)}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Actualizar un elemento existente
+  // Update an existing element
   const handleUpdateItem = async (e) => {
     e.preventDefault();
     
@@ -154,25 +178,39 @@ export default function AdminSettingsPage({ navigate }) {
           await updatePriority(editingItem.id, editingItem);
           setPriorities(priorities.map(item => item.id === editingItem.id ? editingItem : item));
           break;
-        case 'status':
-          await updateStatus(editingItem.id, editingItem);
-          setStatuses(statuses.map(item => item.id === editingItem.id ? editingItem : item));
+        case 'status': {
+          const statusData = {
+            ...editingItem,
+            open: !editingItem.is_closed, // Important: open is the opposite of is_closed
+            is_closed: undefined // Remove is_closed
+          };
+          
+          await updateStatus(editingItem.id, statusData);
+          
+          setStatuses(statuses.map(item => 
+            item.id === editingItem.id ? {
+              ...editingItem,
+              open: !editingItem.is_closed // Maintain consistency in local state
+            } : item
+          ));
+          setShowModal(false);
           break;
+        }
         default:
-          throw new Error("Categoría desconocida");
+          throw new Error("Unknown category");
       }
       
       setEditingItem(null);
       setError(null);
     } catch (error) {
-      console.error("Error actualizando elemento:", error);
-      setError(`Error actualizando ${getCategoryDisplayName(editingItem.category)}`);
+      console.error("Error updating element:", error);
+      setError(`Error updating ${getCategoryDisplayName(editingItem.category)}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Eliminar un elemento
+  // Delete an element
   const handleDeleteItem = async (item, category) => {
     try {
       setLoading(true);
@@ -180,27 +218,27 @@ export default function AdminSettingsPage({ navigate }) {
       
       switch (category) {
         case 'type':
-          replacementId = replacementItem.typeId;
+          replacementId = document.getElementById('replacement-select')?.value || replacementItem.typeId;
           await deleteType(item.id, replacementId);
           setTypes(types.filter(t => t.id !== item.id));
           break;
         case 'severity':
-          replacementId = replacementItem.severityId;
+          replacementId = document.getElementById('replacement-select')?.value || replacementItem.severityId;
           await deleteSeverity(item.id, replacementId);
           setSeverities(severities.filter(s => s.id !== item.id));
           break;
         case 'priority':
-          replacementId = replacementItem.priorityId;
+          replacementId = document.getElementById('replacement-select')?.value || replacementItem.priorityId;
           await deletePriority(item.id, replacementId);
           setPriorities(priorities.filter(p => p.id !== item.id));
           break;
         case 'status':
-          replacementId = replacementItem.statusId;
+          replacementId = document.getElementById('replacement-select')?.value || replacementItem.statusId;
           await deleteStatus(item.id, replacementId);
           setStatuses(statuses.filter(s => s.id !== item.id));
           break;
         default:
-          throw new Error("Categoría desconocida");
+          throw new Error("Unknown category");
       }
       
       // Reset replacement state
@@ -213,153 +251,188 @@ export default function AdminSettingsPage({ navigate }) {
       
       setError(null);
     } catch (error) {
-      console.error("Error eliminando elemento:", error);
-      setError(`Error eliminando ${getCategoryDisplayName(category)}`);
+      console.error("Error deleting element:", error);
+      setError(`Error deleting ${getCategoryDisplayName(category)}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Editar un elemento existente
-  const startEditing = (item, category) => {
-    setEditingItem({
-      ...item,
-      category
-    });
-  };
+  // Edit an existing element
+const startEditing = (item, category) => {
+  // Primero establecer el objeto editingItem con los datos correctos
+  setEditingItem({
+    ...item,
+    category
+  });
+  
+  // Luego establecer el tipo de modal y mostrarlo después de un pequeño delay
+  // Este delay permite que React actualice el estado de editingItem antes de usar el valor
+  setTimeout(() => {
+    setModalType('edit');
+    setShowModal(true);
+  }, 10);
+};
 
-  // Función auxiliar para obtener el nombre amigable de una categoría
+  // Helper function to get friendly name of a category
   const getCategoryDisplayName = (category) => {
     switch (category) {
-      case 'type': return 'Tipo';
-      case 'severity': return 'Severidad';
-      case 'priority': return 'Prioridad';
-      case 'status': return 'Estado';
-      default: return 'Elemento';
+      case 'type': return 'Type';
+      case 'severity': return 'Severity';
+      case 'priority': return 'Priority';
+      case 'status': return 'Status';
+      default: return 'Element';
     }
   };
 
-  // Renderizar formulario de nuevo elemento o edición
+  // Render new element or edit form
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState('new'); 
   const renderItemForm = (isEditing = false) => {
     const item = isEditing ? editingItem : newItem;
+
+    if (!item) {
+      console.error("Item is null in renderItemForm:", { isEditing, editingItem, newItem });
+      return null; // No renderizar nada si el item es null
+    }
     
     return (
-      <form onSubmit={isEditing ? handleUpdateItem : handleSaveNewItem} className="bg-white p-6 rounded-lg shadow mb-6">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900">
-        {isEditing 
-            ? `Editar ${getCategoryDisplayName(item.category)}` 
-            : 'Nuevo Elemento'
-        }
-        </h3>
-        
-        {!isEditing && (
-          <div className="mb-4">
-            <label className="block text-gray-900 font-medium mb-2">
-              Categoría
-            </label>
-            <select 
-              name="category" 
-              value={item.category || ''} 
-              onChange={(e) => handleItemChange(e, isEditing)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
-              required
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {isEditing 
+                ? `Edit ${getCategoryDisplayName(item.category)}` 
+                : 'New Element'
+              }
+            </h3>
+            <button 
+              className="text-gray-500 hover:text-gray-700"
+              onClick={() => {
+                setShowModal(false);
+                if (isEditing) setEditingItem(null);
+              }}
             >
-              <option value="">Selecciona una categoría</option>
-              <option value="type">Tipo</option>
-              <option value="severity">Severidad</option>
-              <option value="priority">Prioridad</option>
-              <option value="status">Estado</option>
-            </select>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-        )}
-        
-        <div className="mb-4">
-          <label className="block text-gray-900 font-medium mb-2">
-            Nombre
-          </label>
-          <input 
-            type="text" 
-            name="name" 
-            value={item.name || ''} 
-            onChange={(e) => handleItemChange(e, isEditing)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
-            required
-          />
-        </div>
-        
-        <div className="mb-4">
-          <label className="block text-gray-900 font-medium mb-2">
-            Color
-          </label>
-          <div className="flex items-center gap-2">
-            <input 
-              type="color" 
-              name="color" 
-              value={item.color || '#3498db'} 
-              onChange={(e) => handleItemChange(e, isEditing)}
-              className="p-1 border border-gray-300 rounded"
-            />
-            <input 
-              type="text" 
-              name="color" 
-              value={item.color || '#3498db'} 
-              onChange={(e) => handleItemChange(e, isEditing)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
-              pattern="^#([A-Fa-f0-9]{6})$"
-              title="Código de color hexadecimal (ej: #FF0000)"
-            />
-          </div>
-        </div>
-        
-        
-        {item.category === 'status' && (
-          <div className="mb-4">
-            <label className="flex items-center">
+
+          <form onSubmit={isEditing ? handleUpdateItem : handleSaveNewItem}>
+            {!isEditing && (
+              <div className="mb-4">
+                <label className="block text-gray-900 font-medium mb-2">
+                  Category
+                </label>
+                <select 
+                  name="category" 
+                  value={item.category || ''} 
+                  onChange={(e) => handleItemChange(e, isEditing)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  <option value="type">Type</option>
+                  <option value="severity">Severity</option>
+                  <option value="priority">Priority</option>
+                  <option value="status">Status</option>
+                </select>
+              </div>
+            )}
+            
+            <div className="mb-4">
+              <label className="block text-gray-900 font-medium mb-2">
+                Name
+              </label>
               <input 
-                type="checkbox" 
-                name="is_closed" 
-                checked={item.is_closed || false} 
+                type="text" 
+                name="name" 
+                value={item.name || ''} 
                 onChange={(e) => handleItemChange(e, isEditing)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                required
               />
-              <span className="text-gray-900">¿Estado cerrado?</span>
-            </label>
-          </div>
-        )}
-        
-        <div className="flex justify-end gap-2">
-            <button
-            type="button"
-            className="px-4 py-2 bg-gray-300 text-gray-900 rounded hover:bg-gray-400"
-            onClick={() => isEditing ? setEditingItem(null) : setShowNewItemForm(false)}
-            >
-            Cancelar
-            </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            disabled={loading}
-          >
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-gray-900 font-medium mb-2">
+                Color
+              </label>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="color" 
+                  name="color" 
+                  value={item.color || '#3498db'} 
+                  onChange={(e) => handleItemChange(e, isEditing)}
+                  className="p-1 border border-gray-300 rounded"
+                />
+                <input 
+                  type="text" 
+                  name="color" 
+                  value={item.color || '#3498db'} 
+                  onChange={(e) => handleItemChange(e, isEditing)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+                  pattern="^#([A-Fa-f0-9]{6})$"
+                  title="Hexadecimal color code (e.g. #FF0000)"
+                />
+              </div>
+            </div>
+            
+            {item.category === 'status' && (
+              <div className="mb-4">
+                <label className="flex items-center gap-2">
+                  <input 
+                    type="checkbox" 
+                    name="is_closed" 
+                    checked={!!item.is_closed} 
+                    onChange={(e) => handleItemChange(e, isEditing)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-gray-900">Is closed status?</span>
+                </label>
+              </div>
+            )}
+                    
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="px-4 py-2 bg-gray-300 text-gray-900 rounded hover:bg-gray-400"
+                onClick={() => {
+                  setShowModal(false);
+                  if (isEditing) setEditingItem(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                disabled={loading}
+              >
+                {loading ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     );
   };
 
-  // Renderizar tabla de elementos
+
+  // Render table of elements
   const renderItemsTable = (items, category) => {
     return (
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
         <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Nombre</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Name</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Color</th>
             {category === 'status' && (
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">¿Cerrado?</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Is Closed?</th>
             )}
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Acciones</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Actions</th>
         </tr>
         </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -376,9 +449,12 @@ export default function AdminSettingsPage({ navigate }) {
                 </div>
                 </td>
                 {category === 'status' && (
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                    {item.is_closed ? 'Sí' : 'No'}
-                </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                    {(item.is_closed === true || 
+                      item.is_closed === 'true' || 
+                      item.is_closed === 1 || 
+                      item.is_closed === '1') ? 'Yes' : 'No'}
+                  </td>
                 )}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex space-x-2">
@@ -408,18 +484,18 @@ export default function AdminSettingsPage({ navigate }) {
     );
   };
 
-  // Confirmar eliminación
+  // Confirm deletion
   const confirmDelete = (item, category) => {
-    const isConfirmed = window.confirm(`¿Está seguro que desea eliminar "${item.name}"? Esta acción requerirá un elemento de reemplazo.`);
+    const isConfirmed = window.confirm(`Are you sure you want to delete "${item.name}"? This action will require a replacement element.`);
     
     if (isConfirmed) {
       showDeleteConfirmation(item, category);
     }
   };
 
-  // Mostrar formulario para seleccionar elemento de reemplazo
+  // Show form to select replacement element
   const showDeleteConfirmation = (item, category) => {
-    // Obtener elementos disponibles para reemplazar (excluyendo el elemento a eliminar)
+    // Get available elements to replace (excluding the element to delete)
     let availableItems = [];
     let replacementField = "";
     
@@ -442,41 +518,41 @@ export default function AdminSettingsPage({ navigate }) {
         break;
     }
 
-    // Si no hay elementos de reemplazo disponibles
+    // If there are no replacement elements available
     if (availableItems.length === 0) {
-      alert(`No se puede eliminar: No hay otro ${getCategoryDisplayName(category)} disponible para reemplazarlo.`);
+      alert(`Cannot delete: There is no other ${getCategoryDisplayName(category)} available to replace it.`);
       return;
     }
     
-    // Establecer el primer item como valor por defecto para reemplazo
+    // Set the first item as default value for replacement
     setReplacementItem(prev => ({
       ...prev,
       [replacementField]: availableItems[0]?.id || ''
     }));
     
-    // Mostrar modal para confirmar reemplazo
+    // Show modal to confirm replacement
     const replacementHtml = `
     <div class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-        <h3 class="text-lg font-semibold mb-4 text-gray-900">Seleccionar reemplazo</h3>
-        <p class="mb-4 text-gray-900">Las issues que usan "${item.name}" ahora usarán:</p>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900">Select replacement</h3>
+        <p class="mb-4 text-gray-900">Issues using "${item.name}" will now use:</p>
         <select id="replacement-select" class="w-full mb-4 p-2 border rounded text-gray-900">
             ${availableItems.map(i => `<option value="${i.id}">${i.name}</option>`).join('')}
         </select>
         <div class="flex justify-end gap-2">
-            <button id="cancel-delete" class="px-4 py-2 bg-gray-300 text-gray-900 rounded hover:bg-gray-400">Cancelar</button>
-            <button id="confirm-delete" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Eliminar</button>
+            <button id="cancel-delete" class="px-4 py-2 bg-gray-300 text-gray-900 rounded hover:bg-gray-400">Cancel</button>
+            <button id="confirm-delete" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
         </div>
         </div>
     </div>
     `;
     
-    // Insertar modal en el DOM
+    // Insert modal into DOM
     const modalContainer = document.createElement('div');
     modalContainer.innerHTML = replacementHtml;
     document.body.appendChild(modalContainer);
     
-    // Configurar event listeners
+    // Set up event listeners
     document.getElementById('cancel-delete').addEventListener('click', () => {
       document.body.removeChild(modalContainer);
     });
@@ -491,7 +567,7 @@ export default function AdminSettingsPage({ navigate }) {
       document.body.removeChild(modalContainer);
     });
     
-    // Actualizar estado de reemplazo cuando cambia la selección
+    // Update replacement state when selection changes
     document.getElementById('replacement-select').addEventListener('change', (e) => {
       setReplacementItem(prev => ({
         ...prev,
@@ -500,73 +576,70 @@ export default function AdminSettingsPage({ navigate }) {
     });
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Configuración</h1>
-        <button
-          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-          onClick={() => navigate("IndexIssues")}
-        >
-          Volver a Issues
-        </button>
+return (
+  <div className="container mx-auto px-4 py-8">
+    <div className="flex justify-between items-center mb-6">
+      <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+      <button
+        className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+        onClick={() => navigate("IndexIssues")}
+      >
+        Back to Issues
+      </button>
+    </div>
+    
+    {error && (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {error}
       </div>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-      
-      {/* Botón para añadir nuevo elemento */}
-      {!showNewItemForm && !editingItem && (
-        <button
-          className="mb-6 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          onClick={() => setShowNewItemForm(true)}
-        >
-          Añadir Nuevo Elemento
-        </button>
-      )}
-      
-      {/* Formulario para nuevo elemento */}
-      {showNewItemForm && !editingItem && renderItemForm(false)}
-      
-      {/* Formulario para editar elemento */}
-      {editingItem && renderItemForm(true)}
-      
-      {/* Secciones para cada categoría */}
-      <div className="space-y-8">
-        <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Tipos</h2>
-          {loading && !types.length ? (
-            <p>Cargando tipos...</p>
-          ) : (
-            renderItemsTable(types, 'type')
-          )}
-        </section>
+    )}
+    
+    {/* Button to add new element */}
+    <button
+      className="mb-6 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+      onClick={() => {
+        setModalType('new');
+        setShowModal(true);
+      }}
+    >
+      Add New Element
+    </button>
+    
+    {/* Modal for new/edit element */}
+    {showModal && (modalType === 'new' || (modalType === 'edit' && editingItem)) && renderItemForm(modalType === 'edit')}    
+    {/* Sections for each category */}
+    <div className="space-y-8">
+      <section>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Types</h2>
+        {loading && !types.length ? (
+          <p>Loading types...</p>
+        ) : (
+          renderItemsTable(types, 'type')
+        )}
+      </section>
         
         <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Severidades</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Severities</h2>
           {loading && !severities.length ? (
-            <p>Cargando severidades...</p>
+            <p>Loading severities...</p>
           ) : (
             renderItemsTable(severities, 'severity')
           )}
         </section>
         
         <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Prioridades</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Priorities</h2>
           {loading && !priorities.length ? (
-            <p>Cargando prioridades...</p>
+            <p>Loading priorities...</p>
           ) : (
             renderItemsTable(priorities, 'priority')
           )}
         </section>
         
         <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Estados</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Statuses</h2>
           {loading && !statuses.length ? (
-            <p>Cargando estados...</p>
+            <p>Loading statuses...</p>
           ) : (
             renderItemsTable(statuses, 'status')
           )}
