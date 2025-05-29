@@ -82,3 +82,296 @@
 .issuepage-sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; }
 .issuepage-sidebar-buttons { display: flex; gap: 0.5rem; }
 .issuepage-sidebar-btn { background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0.3rem 0.8rem; cursor: pointer; font-size: 0.95rem; }
+
+.issuepage-sidebar-due-date {
+  background: #fff;
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.issuepage-sidebar-date-value {
+  font-weight: 600;
+  color: #3b82f6;
+  margin-bottom: 4px;
+}
+
+.issuepage-sidebar-date-reason {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 6px;
+  font-style: italic;
+}
+
+.calendar-icon {
+  margin-right: 6px;
+}
+
+.issuepage-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(255, 255, 255);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.issuepage-due-date-modal {
+  background: white;
+  box-shadow: none; /* Eliminar sombra */
+  display: flex;
+  flex-direction: column;
+  width: 600px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.issuepage-modal-header {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+}
+
+.issuepage-modal-header h2 {
+  margin: 0;
+  color: #2e3440;
+  font-weight: 400;
+  font: inherit;
+  font-size: 1.5rem;
+}
+
+.issuepage-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 8px;
+  z-index: 1010;
+}
+
+.issuepage-modal-content {
+  padding: 1rem;
+}
+
+.issuepage-date-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #303030;
+  font: inherit;
+}
+
+.issuepage-quick-dates {
+  justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.issuepage-quick-date-btn {
+  background: #f1f5f9;
+  padding: 0.5rem 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  width: 23%;
+  color: #6a6a6a;
+  font: inherit;
+}
+
+.issuepage-quick-date-btn:hover {
+  background: #e2e8f0;
+}
+
+.issuepage-due-date-reason h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: #6a6a6a;
+  font-weight: normal;
+}
+
+.issuepage-reason-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  min-height: 100px;
+  resize: vertical;
+  color: #000000;
+  font: inherit;
+}
+
+.issuepage-modal-footer {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.issuepage-modal-save {
+  background-color: #83c39f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 2rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.issuepage-modal-delete {
+  background: none;
+  border: none;
+  color: #e44057;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  transition: opacity 0.2s;
+}
+
+.issuepage-modal-delete:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.issuepage-modal-save:hover {
+  background-color: #72b48e;
+}
+
+.issuepage-modal-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.issuepage-date-input:focus {
+  border-color: rgb(40, 114, 117);
+  box-shadow: 0 0 0 1px rgb(40, 114, 117);
+  outline: none;
+}
+
+.issuepage-reason-textarea:focus {
+  border-color: rgb(40, 114, 117);
+  box-shadow: 0 0 0 1px rgb(40, 114, 117);
+  outline: none;
+}
+
+.issuepage-modal-delete svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.issuepage-modal-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.issuepage-delete-confirm-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(255, 255, 255);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1010;
+}
+
+.issuepage-delete-confirm {
+  background: white;
+  border-radius: 6px;
+  padding: 1rem;
+  width: 90%;
+  max-width: 400px;
+}
+
+.issuepage-delete-confirm-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.issuepage-delete-confirm-icon {
+  color: #e44057;
+  margin-right: 0.75rem;
+  stroke: currentColor;
+  fill: none;
+}
+
+.issuepage-delete-confirm-header h3 {
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #2e3440;
+  margin: 0;
+}
+
+.issuepage-delete-confirm-content {
+  margin-bottom: 1.5rem;
+}
+
+.issuepage-delete-confirm-content p {
+  justify-content: center;
+  padding-left: 2.5rem;
+  font-size: 0.875rem;
+  color: #4c566a;
+  line-height: 1.5;
+}
+
+.issuepage-delete-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.issuepage-delete-confirm-cancel {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #d8dee9;
+  border-radius: 4px;
+  color: #4c566a;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.issuepage-delete-confirm-confirm {
+  padding: 0.5rem 1rem;
+  background: #e44057;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.issuepage-delete-confirm-confirm:hover {
+  background: #d63447;
+}
+
+.issuepage-delete-confirm-confirm:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
