@@ -384,9 +384,9 @@ const handleStatusSelect = (statusId) => {
                           onClick={triggerFileInput}
                           className="add-attachment-button"
                         >
-                          <svg className="icon-add" viewBox="0 0 24 24">
-                            <path d="M12 4v16m8-8H4" />
-                          </svg>
+                        <svg className="icon-add" viewBox="0 0 24 24">
+                          <path d="M12 4v16m8-8H4" />
+                        </svg>
                         </button>
                       </div>
                     </div>
@@ -419,7 +419,7 @@ const handleStatusSelect = (statusId) => {
                 </fieldset>
               </div>
 
-              <sidebar className="sidebar">
+              <aside className="sidebar">
                 <fieldset className="status-field">
                   <div className="dropdown-container" ref={statusDropdownRef}>
                     <button
@@ -613,7 +613,7 @@ const handleStatusSelect = (statusId) => {
                     )}
                   </div>
                 </div>
-              </sidebar>
+              </aside>
             </div>
 
             <div className="button-container">
