@@ -35,6 +35,7 @@ export default function IssuesIndexPage({ navigate }) {
     search: "",
     assignedTo: [],
     createdBy: [],
+    unassigned: false,
   });
   const [sort, setSort] = useState({
     field: "updated_at",
@@ -44,83 +45,77 @@ export default function IssuesIndexPage({ navigate }) {
   const [currentIssueId, setCurrentIssueId] = useState(null);
   const [showBulkInsertModal, setShowBulkInsertModal] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-        // Cargar los datos de filtrado
-        const [
-          typesData,
-          severitiesData,
-          prioritiesData,
-          statusesData,
-          usersData,
-        ] = await Promise.all([
-          getTypes(),
-          getSeverities(),
-          getPriorities(),
-          getStatuses(),
-          getUsers(),
-        ]);
+      // Carga de datos iniciales (sin cambios)
+      const [typesData, severitiesData, prioritiesData, statusesData, usersData] = 
+        await Promise.all([getTypes(), getSeverities(), getPriorities(), getStatuses(), getUsers()]);
+      
+      setTypes(typesData);
+      setSeverities(severitiesData);
+      setPriorities(prioritiesData);
+      setStatuses(statusesData);
+      setAssignedTo(usersData);
+      setCreatedBy(usersData);
+      setUsers(usersData);
 
-        setTypes(typesData);
-        setSeverities(severitiesData);
-        setPriorities(prioritiesData);
-        setStatuses(statusesData);
-        setAssignedTo(usersData);
-        setCreatedBy(usersData);
+      // Parámetros para la API (sin incluir filter_unassigned)
+      const params = {
+        sort: sort.field,
+        direction: sort.direction,
+        search: filters.search || undefined,
+      };
 
-        setUsers(usersData);
+      // Añadir los filtros estándar
+      if (filters.type.length > 0) params["filter_type[]"] = filters.type;
+      if (filters.severity.length > 0) params["filter_severity[]"] = filters.severity;
+      if (filters.priority.length > 0) params["filter_priority[]"] = filters.priority;
+      if (filters.status.length > 0) params["filter_status[]"] = filters.status;
+      if (filters.assignedTo.length > 0) params["filter_assignee[]"] = filters.assignedTo;
+      if (filters.createdBy.length > 0) params["filter_creator[]"] = filters.createdBy;
 
-        const params = {
-          sort: sort.field,
-          direction: sort.direction,
-          search: filters.search || undefined,
-        };
+      // Obtener issues desde la API
+      const issuesData = await getIssues(params);
 
-        // Añadir los filtros seleccionados
-        if (filters.type.length > 0) params["filter_type[]"] = filters.type;
-        if (filters.severity.length > 0)
-          params["filter_severity[]"] = filters.severity;
-        if (filters.priority.length > 0)
-          params["filter_priority[]"] = filters.priority;
-        if (filters.status.length > 0)
-          params["filter_status[]"] = filters.status;
-        if (filters.assignedTo.length > 0)
-          params["filter_assignee[]"] = filters.assignedTo;
-        if (filters.createdBy.length > 0)
-          params["filter_creator[]"] = filters.createdBy;
-
-        const issuesData = await getIssues(params);
-
-        const processedIssues = issuesData.map((issue) => {
-          // Si la issue tiene un assigned_to_id, busca el usuario completo
-          if (issue.assigned_to_id) {
-            const assignedUser = usersData.find(
-              (user) => user.id === issue.assigned_to_id
-            );
-            if (assignedUser) {
-              issue.assigned_to_user = assignedUser;
-            }
+      // Procesar las issues para añadir detalles de usuario
+      const processedIssues = issuesData.map((issue) => {
+        if (issue.assigned_to_id) {
+          const assignedUser = usersData.find(
+            (user) => user.id === issue.assigned_to_id
+          );
+          if (assignedUser) {
+            issue.assigned_to_user = assignedUser;
           }
-          return issue;
-        });
+        }
+        return issue;
+      });
 
-        setIssues(processedIssues);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
+      // FILTRO MANUAL: Si está activado el filtro "Sin asignar"
+      let filteredIssues = processedIssues;
+      if (filters.unassigned) {
+        // Filtrar solo las issues que no tienen assigned_to_id
+        filteredIssues = processedIssues.filter(issue => !issue.assigned_to_id);
       }
-    };
 
-    fetchData();
-  }, [filters, sort]);
+      setIssues(filteredIssues);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, [filters, sort]);
 
   const handleFilterChange = (filterType, value) => {
     if (filterType === "search") {
       setFilters((prev) => ({ ...prev, search: value }));
+    } else if (filterType === "unassigned") {
+      setFilters((prev) => ({ ...prev, unassigned: value }));
     } else {
       setFilters((prev) => {
         const currentValues = [...prev[filterType]];
@@ -149,6 +144,7 @@ export default function IssuesIndexPage({ navigate }) {
       };
 
       console.log("Enviando actualización:", updateData);
+      //console.log(currentUser);
       await updateIssue(currentIssueId, updateData);
 
       const assignedUser = users.find((user) => user.id === userId);
@@ -179,6 +175,31 @@ export default function IssuesIndexPage({ navigate }) {
     }
   };
 
+    // Añade esta función antes del return del componente
+  const getSortedIssues = () => {
+    // Si estamos ordenando por assigned_to_id y tenemos filtro unassigned
+    if (sort.field === "assigned_to_id" && filters.unassigned) {
+      return [...issues].sort((a, b) => {
+        // Convertir a números o strings vacíos para comparación
+        const aValue = a.assigned_to_id || "";
+        const bValue = b.assigned_to_id || "";
+        
+        // Ordenar
+        if (aValue === bValue) return 0;
+        if (sort.direction === "asc") {
+          return aValue < bValue ? -1 : 1;
+        } else {
+          return aValue > bValue ? -1 : 1;
+        }
+      });
+    }
+    
+    // Para cualquier otro caso, usar las issues ya ordenadas por la API
+    return issues;
+  };
+
+
+
   const handleBulkInsert = async (issuesData) => {
     try {
       setLoading(true);
@@ -195,17 +216,15 @@ export default function IssuesIndexPage({ navigate }) {
         search: filters.search || undefined,
       };
 
-      // Añadir los filtros seleccionados si existen
+      // Añadir los filtros seleccionados
       if (filters.type.length > 0) params["filter_type[]"] = filters.type;
-      if (filters.severity.length > 0)
-        params["filter_severity[]"] = filters.severity;
-      if (filters.priority.length > 0)
-        params["filter_priority[]"] = filters.priority;
+      if (filters.severity.length > 0) params["filter_severity[]"] = filters.severity;
+      if (filters.priority.length > 0) params["filter_priority[]"] = filters.priority;
       if (filters.status.length > 0) params["filter_status[]"] = filters.status;
-      if (filters.assignedTo.length > 0)
-        params["filter_assignee[]"] = filters.assignedTo;
-      if (filters.createdBy.length > 0)
-        params["filter_creator[]"] = filters.createdBy;
+      if (filters.assignedTo.length > 0) params["filter_assignee[]"] = filters.assignedTo;
+      if (filters.createdBy.length > 0) params["filter_creator[]"] = filters.createdBy;
+      // Añadir filtro para issues sin asignar
+      if (filters.unassigned) params.filter_unassigned = true;
 
       // Recargar las issues
       const updatedIssues = await getIssues(params);
@@ -246,7 +265,8 @@ export default function IssuesIndexPage({ navigate }) {
       filters.priority.length > 0 ||
       filters.status.length > 0 ||
       filters.assignedTo.length > 0 ||
-      filters.createdBy.length > 0
+      filters.createdBy.length > 0 ||
+      filters.unassigned
     );
   };
 
@@ -413,6 +433,18 @@ export default function IssuesIndexPage({ navigate }) {
             <div>
               <h3 className="font-medium mb-2 text-gray-900">Asignado a</h3>
               <div className="max-h-32 overflow-y-auto">
+                {/* Agregar opción "Sin asignar" */}
+                <label className="flex items-center gap-2 mb-1">
+                  <input
+                    type="checkbox"
+                    checked={filters.unassigned}
+                    onChange={() => handleFilterChange("unassigned", !filters.unassigned)}
+                  />
+                  <span className="flex items-center gap-2 text-gray-800">
+                    <span className="inline-block w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center">-</span>
+                    Sin asignar
+                  </span>
+                </label>
                 {assignedTo.map((user) => (
                   <label key={user.id} className="flex items-center gap-2 mb-1">
                     <input
@@ -529,13 +561,17 @@ export default function IssuesIndexPage({ navigate }) {
                   {sort.field === "updated_at" &&
                     (sort.direction === "asc" ? "↑" : "↓")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                  Asignado a
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSortChange("assigned_to_id")}
+                >
+                  Asignado a{" "}
+                  {sort.field === "assigned_to_id" && (sort.direction === "asc" ? "↑" : "↓")}
                 </th>
-              </tr>
+               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {issues.map((issue) => (
+            {getSortedIssues().map((issue) => (
                 <tr
                   key={issue.id}
                   className="hover:bg-gray-50 cursor-pointer"

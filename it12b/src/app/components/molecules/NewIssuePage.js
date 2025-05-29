@@ -21,6 +21,8 @@ export default function NewIssuePage({ navigate }) {
     priority_id: "",
     status_id: "",
     assigned_to_id: "",
+    due_date: "", 
+    due_date_reason: "",
   });
 
   const [types, setTypes] = useState([]);
@@ -41,6 +43,12 @@ export default function NewIssuePage({ navigate }) {
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
+
+  const typeDropdownRef = useRef(null);
+  const severityDropdownRef = useRef(null);
+  const priorityDropdownRef = useRef(null);
+  const statusDropdownRef = useRef(null);
+  const assigneeDropdownRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,15 +92,47 @@ export default function NewIssuePage({ navigate }) {
       }
     };
 
+    const handleClickOutside = (event) => {
+      if (typeDropdownRef.current && !typeDropdownRef.current.contains(event.target)) {
+        setShowTypeDropdown(false);
+      }
+      if (severityDropdownRef.current && !severityDropdownRef.current.contains(event.target)) {
+        setShowSeverityDropdown(false);
+      }
+      if (priorityDropdownRef.current && !priorityDropdownRef.current.contains(event.target)) {
+        setShowPriorityDropdown(false);
+      }
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target)) {
+        setShowStatusDropdown(false);
+      }
+      if (assigneeDropdownRef.current && !assigneeDropdownRef.current.contains(event.target)) {
+        setShowAssigneeDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
     fetchData();
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "due_date") {
+    const currentStatus = getSelectedStatus();
+    if (currentStatus && !currentStatus.open) {
+      setError("You cannot establish a due date in a closed issue");
+      return;
+    }
+    if (!value) {
+      setFormData(prev => ({ ...prev, [name]: value, due_date_reason: "" }));
+      return;
+    }
+  }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  // Manejo de selección directa en dropdowns
   const handleTypeSelect = (typeId) => {
     setFormData(prev => ({ ...prev, type_id: typeId }));
     setShowTypeDropdown(false);
@@ -108,10 +148,19 @@ export default function NewIssuePage({ navigate }) {
     setShowPriorityDropdown(false);
   };
   
-  const handleStatusSelect = (statusId) => {
-    setFormData(prev => ({ ...prev, status_id: statusId }));
-    setShowStatusDropdown(false);
-  };
+const handleStatusSelect = (statusId) => {
+  setFormData(prev => {
+    const newFormData = { ...prev, status_id: statusId };
+    const newStatus = statuses.find(s => s.id === statusId);
+    if (!newStatus.open) {
+      newFormData.due_date = "";
+      newFormData.due_date_reason = "";
+    }
+    
+    return newFormData;
+  });
+  setShowStatusDropdown(false);
+};
   
   const handleAssigneeSelect = (userId) => {
     setFormData(prev => ({ ...prev, assigned_to_id: userId }));
@@ -372,7 +421,7 @@ export default function NewIssuePage({ navigate }) {
 
               <sidebar className="sidebar">
                 <fieldset className="status-field">
-                  <div className="dropdown-container">
+                  <div className="dropdown-container" ref={statusDropdownRef}>
                     <button
                       type="button"
                       onClick={() => setShowStatusDropdown(!showStatusDropdown)}
@@ -402,7 +451,7 @@ export default function NewIssuePage({ navigate }) {
                 </fieldset>
 
                 <section className="assigned-section">
-                  <div className="dropdown-container">
+                  <div className="dropdown-container" ref={assigneeDropdownRef}>
                     <button
                       type="button" 
                       onClick={() => setShowAssigneeDropdown(!showAssigneeDropdown)}
@@ -447,7 +496,7 @@ export default function NewIssuePage({ navigate }) {
 
                 <div className="field-container" id="issue-type-container">
                   <div className="field-label">Type</div>
-                  <div className="dropdown-container">
+                  <div className="dropdown-container" ref={typeDropdownRef}>
                     <div 
                       className="field-value"
                       onClick={() => setShowTypeDropdown(!showTypeDropdown)}
@@ -477,7 +526,7 @@ export default function NewIssuePage({ navigate }) {
 
                 <div className="field-container" id="severity-container">
                   <div className="field-label">Severity</div>
-                  <div className="dropdown-container">
+                  <div className="dropdown-container" ref={severityDropdownRef}>
                     <div 
                       className="field-value"
                       onClick={() => setShowSeverityDropdown(!showSeverityDropdown)}
@@ -507,7 +556,7 @@ export default function NewIssuePage({ navigate }) {
 
                 <div className="field-container" id="priority-container">
                   <div className="field-label">Priority</div>
-                  <div className="dropdown-container">
+                  <div className="dropdown-container" ref={priorityDropdownRef}>
                     <div 
                       className="field-value"
                       onClick={() => setShowPriorityDropdown(!showPriorityDropdown)}
@@ -531,6 +580,36 @@ export default function NewIssuePage({ navigate }) {
                           ))}
                         </ul>
                       </div>
+                    )}
+                  </div>
+                </div>
+                <div className="field-container" id="due-date-container">
+                  <div className="field-label">Due date</div>
+                  <div className="dropdown-container">
+                    <input
+                      type="date"
+                      name="due_date"
+                      value={formData.due_date}
+                      onChange={handleChange}
+                      className="date-input"
+                      placeholder="Select date"
+                    />
+                  </div>
+                  
+                  <div className="due-date-reason-wrapper">
+                    {formData.due_date ? (
+                      <div className="due-date-reason">
+                        <div className="field-label">Reason for the due date</div>
+                        <textarea
+                          name="due_date_reason"
+                          value={formData.due_date_reason}
+                          onChange={handleChange}
+                          placeholder="Why does this issue need a due date?"
+                          className="reason-textarea"
+                        />
+                      </div>
+                    ) : (
+                      <div className="due-date-reason-placeholder"></div>
                     )}
                   </div>
                 </div>
@@ -760,7 +839,7 @@ export default function NewIssuePage({ navigate }) {
         }
         
         .assigned-section {
-          margin-bottom: 24px;
+          margin-bottom: 8px;
         }
         
         .assignee-dropdown {
@@ -812,12 +891,12 @@ export default function NewIssuePage({ navigate }) {
         }
         
         .field-container {
-          margin-bottom: 24px;
+          margin-bottom: 8px;
           position: relative;
         }
         
         .field-label {
-          color:rgb(0, 0, 0);
+          color:rgba(0, 0, 0, 0.5);
           font-size: 13px;
           margin-bottom: 6px;
         }
@@ -846,7 +925,7 @@ export default function NewIssuePage({ navigate }) {
         
         .lightbox-container {
           background-color: #ffffff;
-          padding: 24px;
+          padding: 5px;
           border-radius: 4px;
           box-shadow: none;
           width: 100%;
@@ -1068,6 +1147,50 @@ export default function NewIssuePage({ navigate }) {
         .loading {
           display: flex;
           align-items: center;
+        }
+
+        .date-input {
+          width: 100%;
+          padding: 8px 12px;
+          background: white;
+          border: 1px solid #d8dee9;
+          border-radius: 3px;
+          cursor: pointer;
+          font-size: 14px;
+          color:rgb(0, 0, 0);
+        }
+
+        .quick-date-button:hover {
+          background-color: #e5e9f0;
+        }
+
+        .due-date-reason {
+          margin-top: 12px;
+          height: 100%;
+          color: #000000;
+        }
+
+        .reason-textarea {
+          width: 100%;
+          padding: 8px 12px;
+          background: white;
+          border: 1px solid #d8dee9;
+          border-radius: 3px;
+          font-size: 14px;
+          color: #000000;
+          height: calc(100% - 25px);
+          min-height: 80px;
+          resize: vertical;
+          margin-top: 4px;
+        }
+
+        .due-date-reason-wrapper {
+          min-height: 130px; /* Altura aproximada del campo de razón + su etiqueta */
+          margin-top: 12px;
+        }
+
+        .due-date-reason-placeholder {
+          height: 100%;
         }
         
         ::placeholder {
