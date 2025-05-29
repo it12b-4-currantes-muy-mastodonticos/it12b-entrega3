@@ -1,7 +1,11 @@
-.issuepage-root { display: flex; flex-direction: column; height: 100vh }
+.issuepage-root { display: flex; flex-direction: column; height: 100vh; }
 .issuepage-wrapper { 
   display: flex;
-  flex-direction: row;} 
+  flex-direction: row;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  width: auto; 
+} 
 .issuepage-header {  flex: 1;
   border-bottom: 2px solid #e5e7eb;
   margin-bottom: 1.5rem;
