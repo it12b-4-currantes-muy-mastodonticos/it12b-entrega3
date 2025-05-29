@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   getIssueById,
   getCommentsByIssueId,
@@ -35,6 +35,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const [severities, setSeverities] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [types, setTypes] = useState([]);
+
+  const fileInputRef = useRef(null);
+  const [files, setFiles] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,6 +91,10 @@ export default function ShowIssuePage({ issueId, navigate }) {
     }
   }, [fieldValue]);
 
+  useEffect(() => {
+    saveField("attachments");
+  }, [files]);
+
   // Inline edit handlers
   const handleFieldClick = (field, value) => {
     setEditingField(field);
@@ -98,13 +105,24 @@ export default function ShowIssuePage({ issueId, navigate }) {
     setFieldValue(e.target.value);
   };
 
+  const handleFileChange = (e) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setFiles((prev) => [...prev, ...newFiles]);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   const saveField = async (field) => {
     if (!issue) return;
     setSavingField(true);
+
     try {
       let updated = { ...issue };
 
-      // Actualiza el campo correspondiente
       switch (field) {
         case "title":
           updated.title = fieldValue;
@@ -133,11 +151,13 @@ export default function ShowIssuePage({ issueId, navigate }) {
         case "due_date_reason":
           updated.due_date_reason = fieldValue;
           break;
+        case "attachments":
+          // Se maneja aparte, ver más abajo
+          break;
         default:
           break;
       }
 
-      // Prepara el payload para updateIssue
       const payload = {
         title: updated.title,
         description: updated.description?.body,
@@ -148,11 +168,24 @@ export default function ShowIssuePage({ issueId, navigate }) {
         issue_type_id: updated.issue_type_id,
         due_date: updated.due_date,
         due_date_reason: updated.due_date_reason,
-        blocked: updated.blocked,
+        // Solo ids de adjuntos ya existentes
+        attachments: issue.attachments?.map((a) => a.id) || [],
       };
 
       const updatedIssue = await updateIssue(issueId, { issue: payload });
       setIssue(updatedIssue);
+
+      if (field === "attachments" && files?.length > 0) {
+        const formData = new FormData();
+        files.forEach((file) => {
+          formData.append("update[attachments][]", file);
+        });
+
+        await updateIssue(issueId, formData);
+
+        const refreshedIssue = await getIssueById(issueId);
+        setIssue(refreshedIssue);
+      }
     } catch (e) {
       alert("Error guardando el campo");
     } finally {
@@ -324,7 +357,20 @@ export default function ShowIssuePage({ issueId, navigate }) {
           <div className="issuepage-attachments">
             <div className="issuepage-attachments-header">
               <b>{issue.attachments?.length || 0} Attachments</b>
-              <button className="issuepage-attachments-add">+</button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="file-input"
+                multiple
+              />
+              <button
+                type="button"
+                onClick={triggerFileInput}
+                className="issuepage-attachments-add"
+              >
+                +
+              </button>
             </div>
             <table className="issuepage-attachments-table">
               <tbody>
