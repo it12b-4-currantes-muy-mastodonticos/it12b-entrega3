@@ -58,9 +58,9 @@ export default function UserProfilePage({ userId, navigate }) {
   return (
     <div className="flex bg-white min-h-screen">
       {/* Sidebar */}
-      <div className="w-1/4 bg-white p-6 shadow-md">
+      <div className="w-1/5 bg-white p-6 shadow-md">
         <div className="flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full bg-gray-300 overflow-hidden mb-4">
+          <div className="w-48 h-48 bg-gray-300 overflow-hidden mb-4">
             {user.avatar_url && (
               <img
                 src={user.avatar_url}
@@ -69,32 +69,37 @@ export default function UserProfilePage({ userId, navigate }) {
               />
             )}
           </div>
-          <h2 className="text-xl font-bold text-gray-800">{user.name}</h2>
-          <p className="text-gray-500">@{user.username}</p>
+          <h2 className="text-2xl font-bold text-[#008aa8]">{user.name}</h2>
+          <p className="text-lg text-gray-500">@{user.username}</p>
+
+          <hr className="w-full border-t my-6" />
+
 
           {/* Contadores */}
-          <div className="mt-6 flex justify-center gap-x-8">
-            <div className="text-center">
-              <p className="text-lg font-bold text-gray-800">{assignedIssues.length}</p>
-              <p className="text-sm text-gray-500">Open Assigned Issues</p>
+          <div className="flex justify-center gap-x-8">
+            <div className="text-center flex-1">
+              <p className="text-3xl font-bold text-gray-500">{assignedIssues.length}</p>
+              <p className="text-base text-gray-500">Open Assigned Issues</p>
             </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-gray-800">{watchedIssues.length}</p>
-              <p className="text-sm text-gray-500">Watched Issues</p>
+            <div className="text-center flex-1">
+              <p className="text-3xl font-bold text-gray-500">{watchedIssues.length}</p>
+              <p className="text-base text-gray-500">Watched Issues</p>
             </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-gray-800">{comments.length}</p>
-              <p className="text-sm text-gray-500">Comments</p>
+            <div className="text-center flex-1">
+              <p className="text-3xl font-bold text-gray-500">{comments.length}</p>
+              <p className="text-base text-gray-500">Comments</p>
             </div>
           </div>
 
+          <hr className="w-full border-t my-6" />
 
-          <p className="text-sm text-gray-700 mt-4 text-center">
-            {user.bio || "Sin biografía"}
+
+          <p className="text-lg text-gray-600 text-center">
+            {user.bio || ""}
           </p>
           <div className="mt-4 flex justify-center">
             <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              className="bg-[#83eede] text-gray-700 my-6 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
               onClick={() => navigate("EditProfile", { userId })}
             >
               EDIT BIO
@@ -108,7 +113,7 @@ export default function UserProfilePage({ userId, navigate }) {
         {/* Tabs */}
         <div className="flex border-b border-t border-gray-200 mb-4">
           <button
-            className={`px-4 py-2 relative ${
+            className={`px-4 py-4 relative ${
               activeTab === "assignedIssues" ? "border-l border-r border-gray-200 font-bold text-gray-500 bg-white top-[1px]" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("assignedIssues")}
@@ -116,7 +121,7 @@ export default function UserProfilePage({ userId, navigate }) {
             Open Assigned Issues
           </button>
           <button
-            className={`px-4 py-2 relative ${
+            className={`px-4 py-4 relative ${
               activeTab === "watchedIssues" ? "border-l border-r border-gray-200 font-bold text-gray-500 bg-white top-[1px]" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("watchedIssues")}
@@ -124,7 +129,7 @@ export default function UserProfilePage({ userId, navigate }) {
             Watched Issues
           </button>
           <button
-            className={`px-4 py-2 relative ${
+            className={`px-4 py-4 relative ${
               activeTab === "comments" ? "border-l border-r border-gray-200 font-bold text-gray-500 bg-white top-[1px]" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("comments")}
@@ -149,36 +154,38 @@ export default function UserProfilePage({ userId, navigate }) {
 
           {activeTab === "comments" && (
             <div>
-                {comments.length > 0 ? (
-                    <ul className="space-y-4">
-                        {comments.map((comment) => (
-                        <li key={comment.id} className="border-b pb-4">
-                            <a
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                handleIssueClick(comment.issue.id);
-                            }}
-                            className="text-blue-500 hover:underline font-bold"
-                            >
-                            #{comment.issue.id} {comment.issue.title}
-                            </a>
-                            <p className="text-sm text-gray-500">
-                            {new Date(comment.created_at).toLocaleDateString("es-ES", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
-                            </p>
-                            <p className="text-gray-700">{comment.content}</p>
-                        </li>
-                        ))}
-                    </ul>
-                ) : (
+              {comments.length > 0 ? (
+                <ul className="space-y-4">
+                  {comments.map((comment) => (
+                    <li key={comment.id} className="border-b pb-4">
+                      <div className="flex items-center">
+                        <a
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleIssueClick(comment.issue.id);
+                          }}
+                          className="text-[#008aa8] hover:text-[#4c566a] font-bold mr-4"
+                        >
+                          #{comment.issue.id} {comment.issue.title}
+                        </a>
+                        <p className="text-sm text-gray-500">
+                          {new Date(comment.created_at).toLocaleDateString("es-ES", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                      <p className="my-3 text-gray-700">{comment.content}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
                 <p>No has hecho comentarios.</p>
-                )}
+              )}
             </div>
           )}
         </div>
