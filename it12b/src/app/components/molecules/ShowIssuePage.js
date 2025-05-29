@@ -92,7 +92,22 @@ export default function ShowIssuePage({ issueId, navigate }) {
   }, [fieldValue]);
 
   useEffect(() => {
-    saveField("attachments");
+    if (files.length === 0) return;
+
+    const processAttachments = async () => {
+      setSavingField(true);
+      try {
+        const updatedIssue = await uploadAttachments();
+        setIssue(updatedIssue);
+        setFiles([]); // Limpia los archivos seleccionados
+      } catch (e) {
+        alert("Error subiendo archivos");
+      } finally {
+        setSavingField(false);
+      }
+    };
+
+    processAttachments();
   }, [files]);
 
   // Inline edit handlers
@@ -151,9 +166,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
         case "due_date_reason":
           updated.due_date_reason = fieldValue;
           break;
-        case "attachments":
-          // Se maneja aparte, ver más abajo
-          break;
         default:
           break;
       }
@@ -168,30 +180,31 @@ export default function ShowIssuePage({ issueId, navigate }) {
         issue_type_id: updated.issue_type_id,
         due_date: updated.due_date,
         due_date_reason: updated.due_date_reason,
-        // Solo ids de adjuntos ya existentes
-        attachments: issue.attachments?.map((a) => a.id) || [],
       };
 
       const updatedIssue = await updateIssue(issueId, { issue: payload });
       setIssue(updatedIssue);
-
-      if (field === "attachments" && files?.length > 0) {
-        const formData = new FormData();
-        files.forEach((file) => {
-          formData.append("update[attachments][]", file);
-        });
-
-        await updateIssue(issueId, formData);
-
-        const refreshedIssue = await getIssueById(issueId);
-        setIssue(refreshedIssue);
-      }
     } catch (e) {
       alert("Error guardando el campo");
     } finally {
       setEditingField(null);
       setSavingField(false);
     }
+  };
+
+  const uploadAttachments = async () => {
+    const formData = new FormData();
+
+    files.forEach((file) => {
+      formData.append("issue[attachments][]", file);
+    });
+
+    const updatedIssue = await updateIssue(issueId, formData);
+
+    if (!response.ok) {
+      throw new Error("Error subiendo los archivos");
+    }
+    return updatedIssue;
   };
 
   const handleFieldBlur = (field) => {
@@ -497,6 +510,34 @@ export default function ShowIssuePage({ issueId, navigate }) {
               >
                 {issue.status?.name?.toUpperCase()}
               </span>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+            className="status-dropdown"
+            style={{ backgroundColor: getSelectedStatus()?.color || "#70728f" }}
+          >
+            <span>{getSelectedStatus()?.name || "Estado"}</span>
+            <svg className="icon-arrow" viewBox="0 0 20 20">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
+          </button>
+
+          {showStatusDropdown && (
+            <div className="dropdown">
+              <ul>
+                {statuses.map((status) => (
+                  <li
+                    key={status.id}
+                    onClick={() => handleStatusSelect(status.id)}
+                  >
+                    <div className="dropdown-item">
+                      <span>{status.name}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
