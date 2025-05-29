@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getUsers } from "../apiCall";
+import { getUsers } from "../../apiCall";
 
 export default function LoginModal({ isOpen, onClose, onLogin }) {
   const [users, setUsers] = useState([]);
@@ -44,12 +44,15 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
         `[LoginModal] Usuario ID: ${selectedUser.id}, Token: ${token}`
       );*/
 
-    localStorage.setItem("user_id", selectedUser.id);
-    console.log(
-      `[LoginModal] Usuario ID guardado en localStorage: ${selectedUser.id}`
-    );
-    onLogin(selectedUser);
-    onClose();
+    if (selectedUser) {
+      // Guardar el usuario en localStorage
+      localStorage.setItem("currentUser", JSON.stringify(selectedUser));
+      localStorage.setItem("currentUserId", selectedUser.id);
+
+      // Llamar al callback de login
+      onLogin(selectedUser);
+      onClose();
+    }
   };
 
   if (!isOpen) return null;

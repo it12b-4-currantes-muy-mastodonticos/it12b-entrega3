@@ -1,0 +1,84 @@
+.issuepage-root { display: flex; flex-direction: column; height: 100vh }
+.issuepage-wrapper { 
+  display: flex;
+  flex-direction: row;} 
+.issuepage-header {  flex: 1;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+  height: 150px;
+  padding-bottom: 2rem;}
+  
+.issuepage-back { color: #3b82f6; text-decoration: underline; font-size: 15px; }
+.issuepage-titleblock { font-size: 2rem; font-weight: bold; color: #1e293b; margin-top: 0.5rem; }
+.issuepage-id { color: #3b82f6; margin-right: 0.5rem; }
+.issuepage-title { margin-right: 1rem; }
+.issuepage-type { color: #64748b; font-size: 1rem; }
+.issuepage-meta { color: #2f8288; font-size: 1rem; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;}
+.issuepage-avatar { width: 32px; height: 32px; border-radius: 50%; }
+.issuepage-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.issuepage-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+.issuepage-description { margin-bottom: 2rem; }
+.issuepage-description-body { font-size: 1.1rem; margin: 1rem 0; color:#1e293b; width: 100%; height: 100px;}
+.issuepage-attachments { background: #ffffff; border-radius: 4px; margin-bottom: 2rem; }
+.issuepage-attachments-header { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 1rem; font-size: 1.1rem; background: #eaf1f6; border-bottom: 1px solid #dbeafe; color: #5f6a72}
+.issuepage-attachments-add { background: #1eeeaf; color: #2b393a; border: none; border-radius: 25%; width: 28px; height: 28px; font-size: 1.3rem; cursor: pointer; }
+.issuepage-attachments-table { width: 100%; margin: 4px;}
+.issuepage-attachment-list-item {border-bottom-width: 4px; border-bottom-color: #eaf1f6;}
+.issuepage-attachment-icon { margin-right: 0.5rem; }
+.issuepage-attachment-size { text-align: right; color: #64748b; font-size: 0.95rem; }
+.issuepage-comments { background: #f6f6f8; border-radius: 4px; margin-bottom: 2rem; }
+.issuepage-comments-header { padding: 0.5rem 1rem; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; color: #5f6a72}
+.issuepage-comments-list { padding: 1rem; }
+.issuepage-comment { border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+.issuepage-comment-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; color: #64748b; border: 1px}
+.issuepage-comment-avatar { width: 20px; height: 20px; border-radius: 50%; }
+.issuepage-comment-date { margin-left: auto; font-size: 0.85rem; }
+.issuepage-comment-body { margin-left: 2.2rem; }
+.issuepage-comment-form { padding: 1rem; border-top: 1px solid #e5e7eb; }
+.issuepage-comment-input { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 3px; color: #5f6a72; }
+.issuepage-comment-submit-button { background-color: #1eeeaf;
+  color: #2b393a;            /* text-white */
+  padding-left: 1rem;     
+  padding-right: 1rem;
+  padding-top: 0.5rem;    
+  padding-bottom: 0.5rem;
+  border-radius: 0.25rem;   
+  border: none; 
+  transition: background-color 0.2s ease; 
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.issuepage-comment-submit-button:hover{
+  background-color: #255c5c; 
+}
+
+.issuepage-sidebar {
+  width: 320px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-left: 1px solid #e5e7eb;
+  box-sizing: border-box;
+}
+.issuepage-status { font-size: 1.3rem; font-weight: bold; color: #334155; margin-bottom: 1.5rem; }
+.issuepage-status-main { background: #3b82f6; color: #fff; padding: 0.2rem 0.7rem; border-radius: 4px; }
+.issuepage-sidebar-section { margin-bottom: 1.5rem; }
+.issuepage-sidebar-label { color: #64748b; font-size: 0.95rem; margin-bottom: 0.2rem; }
+.issuepage-sidebar-value { font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+.issuepage-sidebar-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 0.5rem; }
+.issuepage-sidebar-assigned { background: #fff; border-radius: 4px; padding: 0.5rem; display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.7rem; }
+.issuepage-sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; }
+.issuepage-sidebar-buttons { display: flex; gap: 0.5rem; }
+.issuepage-sidebar-btn { background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0.3rem 0.8rem; cursor: pointer; font-size: 0.95rem; }
