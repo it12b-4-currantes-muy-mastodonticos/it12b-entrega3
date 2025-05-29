@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import IssuesIndexPage from "../molecules/IssuesIndexPage";
-import ShowIssuePage from "../molecules/ShowIssuePage";
-import NewIssuePage from "../molecules/NewIssuePage";
-import UserProfilePage from "../molecules/UserProfilePage";
-import EditProfilePage from "../molecules/EditProfilePage";
+import IssuesIndexPage from "../components/molecules/IssuesIndexPage";
+import ShowIssuePage from "../components/molecules/ShowIssuePage";
+import NewIssuePage from "../components/molecules/NewIssuePage";
+import AdminSettingsPage from "../components/molecules/AdminSettingsPage";
+import UserProfilePage from "../components/molecules/UserProfilePage";
+import EditProfilePage from "../components/molecules/EditProfilePage";
 
 export default function AppNavigator() {
   const [currentScreen, setCurrentScreen] = useState("UserProfile");
@@ -28,8 +29,10 @@ export default function AppNavigator() {
         );
       case "NewIssue":
         return <NewIssuePage navigate={navigate} />;
+      case "AdminSettings":
+        return <AdminSettingsPage navigate={navigate} />;
       case "UserProfile":
-        return <UserProfilePage userId={2} navigate={navigate} />;
+        return <UserProfilePage userId={screenParams.userId} navigate={navigate} />;
       case "EditProfile":
         return <EditProfilePage userId={screenParams.userId} navigate={navigate} />;
       default:
