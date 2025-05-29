@@ -60,7 +60,11 @@ export const bulkCreateIssues = async (issuesText) => {
 };
 
 export const updateIssue = async (id, issueData) => {
-  const response = await api.put(`/issues/${id}`, issueData);
+  const response = await api.put(`/issues/${id}`, issueData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 
@@ -68,6 +72,14 @@ export const deleteIssue = async (id) => {
   const response = await api.delete(`/issues/${id}`);
   return response.data;
 };
+
+export const deleteAttachment = async (issueId, blobId) => {
+  const response = await api.delete(`/issues/${issueId}/attachments`, {
+    params: { blob_id: blobId }
+  });
+  return response.data;
+};
+
 
 // Comments
 export const getCommentsByUserId = async (userId) => {
