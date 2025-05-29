@@ -26,39 +26,33 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
 // Modificación 2: Descomentar y modificar el código que obtiene tokens
   const handleLogin = () => {
     if (selectedUser) {
-      // Descomentar esta sección y asegurarse de que funcione correctamente
-
-      const hardcodedTokenMap = {
-        1: "d7a9fb0517aade4b66a55320a5e11791",
-        2: "cbea22576d236e7b53dbd35ad0f19be6",
-        3: "84d58ef56f610af42a0e516c5fade785",
-        4: "3b6f4d004143639af2929981a30d3080", 
-        5: "1054349cc4b3e55be668ddac6eb3fa76",
-        6: "84d58ef56f610af42a0e516c5fade785",
-      };
-
-    const tokenMap = {
-      1: process.env.NEXT_PUBLIC_USER_TOKEN_1 || hardcodedTokenMap[1],
-      2: process.env.NEXT_PUBLIC_USER_TOKEN_2 || hardcodedTokenMap[2],
-      3: process.env.NEXT_PUBLIC_USER_TOKEN_3 || hardcodedTokenMap[3],
-      4: process.env.NEXT_PUBLIC_USER_TOKEN_4 || hardcodedTokenMap[4],
-      5: process.env.NEXT_PUBLIC_USER_TOKEN_5 || hardcodedTokenMap[5],
-      6: process.env.NEXT_PUBLIC_USER_TOKEN_6 || hardcodedTokenMap[6],
-    };
-      const token = tokenMap[selectedUser.id];
-      console.log(`[LoginModal] Usuario ID: ${selectedUser.id}, Token available: ${token}`);
+      // Convert ID to string to ensure consistency
+      const userId = String(selectedUser.id);
       
-      // Construir el objeto usuario con el token
+      // Use string keys
+      const hardcodedTokenMap = {
+        "1": "d7a9fb0517aade4b66a55320a5e11791",
+        "2": "cbea22576d236e7b53dbd35ad0f19be6",
+        "3": "84d58ef56f610af42a0e516c5fade785",
+        "4": "3b6f4d004143639af2929981a30d3080", 
+        "5": "1054349cc4b3e55be668ddac6eb3fa76",
+        "6": "84d58ef56f610af42a0e516c5fade785",
+      };
+      
+      const token = hardcodedTokenMap[userId];
+      console.log(`[LoginModal] Usuario ID: "${userId}", Token: ${token?.substring(0, 5)}...`);
+      
+      // Store as string
+      localStorage.setItem("user_id", userId);
+      localStorage.setItem("currentUserId", userId);
+      
       const userWithAuth = {
         ...selectedUser,
         token: token
       };
       
-      // Guardar usuario con token en localStorage
       localStorage.setItem("currentUser", JSON.stringify(userWithAuth));
-      localStorage.setItem("currentUserId", selectedUser.id);
-
-      // Pasar usuario con token al callback
+      
       onLogin(userWithAuth);
       onClose();
     }
