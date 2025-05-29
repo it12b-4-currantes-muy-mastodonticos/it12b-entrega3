@@ -39,6 +39,11 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const fileInputRef = useRef(null);
   const [files, setFiles] = useState([]);
 
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const [showSeverityDropdown, setShowSeverityDropdown] = useState(false);
+  const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -88,6 +93,27 @@ export default function ShowIssuePage({ issueId, navigate }) {
       issue?.status_id !== parseInt(fieldValue)
     ) {
       saveField("status_id");
+    }
+    if (
+      editingField === "issue_type_id" &&
+      fieldValue !== "" &&
+      issue?.issue_type_id !== parseInt(fieldValue)
+    ) {
+      saveField("issue_type_id");
+    }
+    if (
+      editingField === "severity_id" &&
+      fieldValue !== "" &&
+      issue?.severity_id !== parseInt(fieldValue)
+    ) {
+      saveField("severity_id");
+    }
+    if (
+      editingField === "priority_id" &&
+      fieldValue !== "" &&
+      issue?.priority_id !== parseInt(fieldValue)
+    ) {
+      saveField("priority_id");
     }
   }, [fieldValue]);
 
@@ -474,29 +500,55 @@ export default function ShowIssuePage({ issueId, navigate }) {
         {/* SIDEBAR */}
         <aside className="issuepage-sidebar">
           {editingField === "status_id" ? (
-            <select
-              value={fieldValue}
-              autoFocus
-              onChange={handleFieldChange}
-              onBlur={() => handleFieldBlur("status_id")}
-              onKeyDown={(e) => handleFieldKeyDown(e, "status_id")}
-              className="px-2 py-1 rounded text-xs font-medium"
-              style={{
-                backgroundColor: "#fff",
-                color: "#000",
-              }}
-              disabled={savingField}
-            >
-              {statuses.map((stat) => (
-                <option key={stat.id} value={stat.id}>
-                  {stat.name}
-                </option>
-              ))}
-            </select>
+            <>
+              <button
+                type="button"
+                onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                className="issuepage-status-main"
+                style={{
+                  backgroundColor:
+                    statuses.find((s) => s.id === parseInt(fieldValue))
+                      ?.color || "#70728f",
+                  color: "#fff",
+                  width: "120px",
+                  textAlign: "left",
+                }}
+              >
+                <span>
+                  {statuses.find((s) => s.id === parseInt(fieldValue))?.name ||
+                    "Estado"}
+                </span>
+                <svg
+                  className="icon-arrow"
+                  viewBox="0 0 20 20"
+                  style={{ float: "right" }}
+                >
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </button>
+
+              {showStatusDropdown && (
+                <div className="dropdown">
+                  <ul>
+                    {statuses.map((status) => (
+                      <li
+                        key={status.id}
+                        onClick={() => {
+                          setFieldValue(status.id);
+                          setShowStatusDropdown(false);
+                        }}
+                      >
+                        <div className="dropdown-item">{status.name}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
           ) : (
             <div
               className="issuepage-status"
-              onClick={() => handleFieldClick("status_id", issue.status_id)}
+              onClick={() => handleFieldClick("status_id", issue.status.id)}
               title="Haz clic para cambiar el estado"
             >
               <span className="issuepage-status-open">
@@ -513,36 +565,178 @@ export default function ShowIssuePage({ issueId, navigate }) {
             </div>
           )}
 
+          {/* TYPE */}
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">type</div>
-            <div className="issuepage-sidebar-value">
-              {issue.issue_type?.name}
-              <span
-                className="issuepage-sidebar-dot"
-                style={{ background: issue.issue_type?.color }}
-              ></span>
-            </div>
+            {editingField === "issue_type_id" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+                  className="issuepage-sidebar-value issuepage-status-main"
+                  style={{
+                    color: "#fff",
+                    width: "100%",
+                    textAlign: "left",
+                  }}
+                >
+                  {types.find((t) => t.id === parseInt(fieldValue))?.name ||
+                    "Type"}
+                  <span
+                    className="issuepage-sidebar-dot"
+                    style={{ background: issue.issue_type?.color }}
+                  ></span>
+                </button>
+                {showTypeDropdown && (
+                  <div className="dropdown">
+                    <ul>
+                      {types.map((type) => (
+                        <li
+                          key={type.id}
+                          onClick={() => {
+                            setFieldValue(type.id);
+                            setShowTypeDropdown(false);
+                          }}
+                        >
+                          <div className="dropdown-item">{type.name}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div
+                className="issuepage-sidebar-value"
+                onClick={() =>
+                  handleFieldClick("issue_type_id", issue.issue_type?.id)
+                }
+              >
+                {issue.issue_type?.name}
+                <span
+                  className="issuepage-sidebar-dot"
+                  style={{ background: issue.issue_type?.color }}
+                />
+              </div>
+            )}
           </div>
+
+          {/* SEVERITY */}
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">severity</div>
-            <div className="issuepage-sidebar-value">
-              {issue.severity?.name}
-              <span
-                className="issuepage-sidebar-dot"
-                style={{ background: issue.severity?.color }}
-              ></span>
-            </div>
+            {editingField === "severity_id" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowSeverityDropdown(!showSeverityDropdown)}
+                  className="issuepage-sidebar-value issuepage-status-main"
+                  style={{
+                    backgroundColor:
+                      severities.find((s) => s.id === parseInt(fieldValue))
+                        ?.color || "#70728f",
+                    color: "#fff",
+                    width: "100%",
+                    textAlign: "left",
+                  }}
+                >
+                  {severities.find((s) => s.id === parseInt(fieldValue))
+                    ?.name || "Severity"}
+                  <svg className="icon-arrow" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                  </svg>
+                </button>
+                {showSeverityDropdown && (
+                  <div className="dropdown">
+                    <ul>
+                      {severities.map((sev) => (
+                        <li
+                          key={sev.id}
+                          onClick={() => {
+                            setFieldValue(sev.id);
+                            setShowSeverityDropdown(false);
+                          }}
+                        >
+                          <div className="dropdown-item">{sev.name}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div
+                className="issuepage-sidebar-value"
+                onClick={() =>
+                  handleFieldClick("severity_id", issue.severity?.id)
+                }
+              >
+                {issue.severity?.name}
+                <span
+                  className="issuepage-sidebar-dot"
+                  style={{ background: issue.severity?.color }}
+                />
+              </div>
+            )}
           </div>
+
+          {/* PRIORITY */}
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">priority</div>
-            <div className="issuepage-sidebar-value">
-              {issue.priority?.name}
-              <span
-                className="issuepage-sidebar-dot"
-                style={{ background: issue.priority?.color }}
-              ></span>
-            </div>
+            {editingField === "priority_id" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowPriorityDropdown(!showPriorityDropdown)}
+                  className="issuepage-sidebar-value issuepage-status-main"
+                  style={{
+                    backgroundColor:
+                      priorities.find((p) => p.id === parseInt(fieldValue))
+                        ?.color || "#70728f",
+                    color: "#fff",
+                    width: "100%",
+                    textAlign: "left",
+                  }}
+                >
+                  {priorities.find((p) => p.id === parseInt(fieldValue))
+                    ?.name || "Priority"}
+                  <svg className="icon-arrow" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                  </svg>
+                </button>
+                {showPriorityDropdown && (
+                  <div className="dropdown">
+                    <ul>
+                      {priorities.map((pri) => (
+                        <li
+                          key={pri.id}
+                          onClick={() => {
+                            setFieldValue(pri.id);
+                            setShowPriorityDropdown(false);
+                          }}
+                        >
+                          <div className="dropdown-item">{pri.name}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div
+                className="issuepage-sidebar-value"
+                onClick={() =>
+                  handleFieldClick("priority_id", issue.priority?.id)
+                }
+              >
+                {issue.priority?.name}
+                <span
+                  className="issuepage-sidebar-dot"
+                  style={{ background: issue.priority?.color }}
+                />
+              </div>
+            )}
           </div>
+
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">ASSIGNED</div>
             {assignedUser && (
