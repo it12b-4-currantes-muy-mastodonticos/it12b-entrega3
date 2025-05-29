@@ -18,9 +18,13 @@ export default function UserProfilePage({ userId, navigate }) {
   const [loading, setLoading] = useState(true);
   const [assignedSort, setAssignedSort] = useState({ field: "issue", direction: "asc" });
   const [watchedSort, setWatchedSort] = useState({ field: "issue", direction: "asc" });
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   
   useEffect(() => {
+    const loggedUserId = localStorage.getItem("currentUserId") || localStorage.getItem("user_id");
+    setCurrentUserId(loggedUserId);
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -110,14 +114,16 @@ export default function UserProfilePage({ userId, navigate }) {
           <p className="text-lg text-gray-600 text-center">
             {user.bio || ""}
           </p>
-          <div className="mt-4 flex justify-center">
-            <button
-              className="bg-[#83eede] text-gray-700 my-6 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
-              onClick={() => navigate("EditProfile", { userId })}
-            >
-              EDIT BIO
-            </button>
-          </div>
+          {String(userId) === String(currentUserId) && (
+            <div className="mt-4 flex justify-center">
+              <button
+                className="bg-[#83eede] text-gray-700 my-6 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
+                onClick={() => navigate("EditProfile", { userId })}
+              >
+                EDIT BIO
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
