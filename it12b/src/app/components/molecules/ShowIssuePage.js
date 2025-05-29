@@ -13,7 +13,7 @@ import {
   getTypes,
   addWatcherToIssue,
   getWatchersByIssueId,
-  removeWatcherFromIssue
+  removeWatcherFromIssue,
   deleteAttachment,
 } from "../../apiCall";
 import { format } from "date-fns";
