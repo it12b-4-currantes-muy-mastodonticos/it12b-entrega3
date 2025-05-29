@@ -384,9 +384,9 @@ const handleStatusSelect = (statusId) => {
                           onClick={triggerFileInput}
                           className="add-attachment-button"
                         >
-                          <svg className="icon-add" viewBox="0 0 24 24">
-                            <path d="M12 4v16m8-8H4" />
-                          </svg>
+                        <svg className="icon-add" viewBox="0 0 24 24">
+                          <path d="M12 4v16m8-8H4" />
+                        </svg>
                         </button>
                       </div>
                     </div>
@@ -395,21 +395,28 @@ const handleStatusSelect = (statusId) => {
                       {files.map((file, index) => (
                         <div key={index} className="attachment-item">
                           <div className="attachment-content">
-                            <svg className="icon-file" viewBox="0 0 24 24">
-                              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                            <span className="icon-file">📎</span>
                             <span className="attachment-name">{file.name}</span>
+                            <a
+                              href={index.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="attachment-name"
+                            >
+                              {index.filename}
+                            </a>
                             <span className="attachment-size">
                               {formatFileSize(file.size)}
                             </span>
                           </div>
                           <button 
-                            type="button"
+                            className="delete-button" 
                             onClick={() => removeFile(index)}
-                            className="delete-button"
+                            type="button"
                           >
-                            <svg className="icon-delete" viewBox="0 0 24 24">
-                              <path d="M6 18L18 6M6 6l12 12" />
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
+                                stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                           </button>
                         </div>
@@ -419,7 +426,7 @@ const handleStatusSelect = (statusId) => {
                 </fieldset>
               </div>
 
-              <sidebar className="sidebar">
+              <aside className="sidebar">
                 <fieldset className="status-field">
                   <div className="dropdown-container" ref={statusDropdownRef}>
                     <button
@@ -613,7 +620,7 @@ const handleStatusSelect = (statusId) => {
                     )}
                   </div>
                 </div>
-              </sidebar>
+              </aside>
             </div>
 
             <div className="button-container">
