@@ -11,7 +11,7 @@ const tokenMap = {
 };
 
 const api = axios.create({
-  baseURL: "http://guarded-thicket-57238-b0a5a41acd38.herokuapp.com",
+  baseURL: "https://guarded-thicket-57238-b0a5a41acd38.herokuapp.com",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

@@ -27,17 +27,26 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
   const handleLogin = () => {
     if (selectedUser) {
       // Descomentar esta sección y asegurarse de que funcione correctamente
-      const tokenMap = {
-        1: process.env.NEXT_PUBLIC_USER_TOKEN_1,
-        2: process.env.NEXT_PUBLIC_USER_TOKEN_2,
-        3: process.env.NEXT_PUBLIC_USER_TOKEN_3,
-        4: process.env.NEXT_PUBLIC_USER_TOKEN_4,
-        5: process.env.NEXT_PUBLIC_USER_TOKEN_5,
-        6: process.env.NEXT_PUBLIC_USER_TOKEN_6,
+
+      const hardcodedTokenMap = {
+        1: "d7a9fb0517aade4b66a55320a5e11791",
+        2: "cbea22576d236e7b53dbd35ad0f19be6",
+        3: "84d58ef56f610af42a0e516c5fade785",
+        4: "3b6f4d004143639af2929981a30d3080", 
+        5: "1054349cc4b3e55be668ddac6eb3fa76",
+        6: "84d58ef56f610af42a0e516c5fade785",
       };
 
+    const tokenMap = {
+      1: process.env.NEXT_PUBLIC_USER_TOKEN_1 || hardcodedTokenMap[1],
+      2: process.env.NEXT_PUBLIC_USER_TOKEN_2 || hardcodedTokenMap[2],
+      3: process.env.NEXT_PUBLIC_USER_TOKEN_3 || hardcodedTokenMap[3],
+      4: process.env.NEXT_PUBLIC_USER_TOKEN_4 || hardcodedTokenMap[4],
+      5: process.env.NEXT_PUBLIC_USER_TOKEN_5 || hardcodedTokenMap[5],
+      6: process.env.NEXT_PUBLIC_USER_TOKEN_6 || hardcodedTokenMap[6],
+    };
       const token = tokenMap[selectedUser.id];
-      console.log(`[LoginModal] Usuario ID: ${selectedUser.id}, Token: ${token}`);
+      console.log(`[LoginModal] Usuario ID: ${selectedUser.id}, Token available: ${!!token}`);
       
       // Construir el objeto usuario con el token
       const userWithAuth = {
