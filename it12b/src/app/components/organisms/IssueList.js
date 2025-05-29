@@ -1,31 +1,56 @@
 "use client";
 
-export default function IssueList({ issues, onIssueClick }) {
+export default function IssueList({ issues, onIssueClick, onSortChange, sortField, sortDirection }) {
   if (!issues || issues.length === 0) {
     return <div className="p-8 text-center text-gray-900">No se encontraron issues</div>;
   }
+
+  const handleSort = (field) => {
+    if (onSortChange) {
+      const newDirection = sortField === field && sortDirection === "asc" ? "desc" : "asc";
+      onSortChange(field, newDirection);
+    }
+  };
 
   return (
     <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow">
       <thead className="bg-gray-50">
         <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-            ID
+          <th
+            className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort("issue")}
+          >
+            ID / Título {sortField === "issue" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-            Título
+          <th
+            className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort("type")}
+          >
+            Tipo {sortField === "type" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-            Tipo
+          <th
+            className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort("severity")}
+          >
+            Severidad {sortField === "severity" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-            Severidad
+          <th
+            className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort("priority")}
+          >
+            Prioridad {sortField === "priority" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-            Prioridad
+          <th
+            className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort("status")}
+          >
+            Estado {sortField === "status" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-            Estado
+          <th
+            className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort("updated_at")}
+          >
+            Actualizado {sortField === "updated_at" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
         </tr>
       </thead>
@@ -37,9 +62,8 @@ export default function IssueList({ issues, onIssueClick }) {
             onClick={() => onIssueClick(issue.id)}
           >
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-800">
-              #{issue.id}
+              #{issue.id} <span className="text-gray-900">{issue.title}</span>
             </td>
-            <td className="px-6 py-4 text-sm text-gray-900">{issue.title}</td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
               <span className="inline-flex items-center gap-1">
                 <span
@@ -79,6 +103,15 @@ export default function IssueList({ issues, onIssueClick }) {
               >
                 {issue.status?.name}
               </span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {new Date(issue.updated_at).toLocaleDateString("es-ES", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </td>
           </tr>
         ))}

@@ -774,18 +774,6 @@ useEffect(() => {
               </button>
             </div>
 
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Search user..."
-                className="w-full px-4 py-2 border rounded-md text-gray-800"
-                onChange={(e) => {
-                  // Here you could implement a local user search
-                  // For simplicity, we won't implement it now
-                }}
-              />
-            </div>
-
             <div className="space-y-2 max-h-64 overflow-y-auto">
               <div
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"

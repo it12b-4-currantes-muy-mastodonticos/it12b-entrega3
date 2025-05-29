@@ -151,9 +151,8 @@
           height: 16px;
           fill: black;
         }
-
 .issuepage-sidebar-section { margin-bottom: 1.5rem; }
-.issuepage-sidebar-label { color: #64748b; font-size: 0.95rem; margin-bottom: 0.2rem;}
+.issuepage-sidebar-label { color: #64748b; font-size: 0.95rem; margin-bottom: 0.2rem; }
 .issuepage-sidebar-value { font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; color: #666b6d;}
 .issuepage-sidebar-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 0.5rem; }
 .issuepage-sidebar-assigned { background: #fff; border-radius: 4px; padding: 0.5rem; display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.7rem; }
@@ -478,4 +477,208 @@
 .issuepage-btn-disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.issuepage-sidebar-watchers {
+
+
+
+  display: flex;
+
+
+  flex-direction: column;
+
+
+  gap: 8px;
+
+
+  margin-bottom: 16px;
+
+
+}
+
+
+
+
+
+.issuepage-sidebar-watcher {
+
+
+  display: flex;
+
+
+  align-items: center;
+
+
+  gap: 8px;
+
+
+  color: #1e293b;
+
+
+  position: relative;
+
+
+}
+
+
+
+
+
+.issuepage-sidebar-avatar {
+
+
+  width: 32px;
+
+
+  height: 32px;
+
+
+  border-radius: 50%;
+
+
+  object-fit: cover;
+
+
+}
+
+
+.modal-overlay {
+
+
+  position: fixed;
+
+
+  top: 0;
+
+
+  left: 0;
+
+
+  width: 100%;
+
+
+  height: 100%;
+
+
+  background: rgba(0, 0, 0, 0.5);
+
+
+  display: flex;
+
+
+  justify-content: center;
+
+
+  align-items: center;
+
+
+  z-index: 1000;
+
+
+}
+
+
+
+
+
+.modal-content {
+
+
+  background: white;
+
+
+  padding: 20px;
+
+
+  border-radius: 8px;
+
+
+  width: 400px;
+
+
+  max-height: 80%;
+
+
+  overflow-y: auto;
+
+
+}
+
+
+
+
+
+.modal-users-list {
+
+
+  display: flex;
+
+
+  flex-direction: column;
+
+
+  gap: 8px;
+
+
+}
+
+
+
+
+
+.modal-user-item {
+
+
+  display: flex;
+
+
+  align-items: center;
+
+
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+
+}
+
+
+
+
+
+.modal-user-avatar {
+
+
+  width: 32px;
+
+
+  height: 32px;
+
+
+  border-radius: 50%;
+
+
+  object-fit: cover;
+
+
+}
+
+
+button {
+
+
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+
+}
+
+
+.issuepage-attachment-delete:disabled {
+
+
+  opacity: 0.5;
+
+
+  cursor: not-allowed;
+
+
 }
