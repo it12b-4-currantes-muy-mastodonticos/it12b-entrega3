@@ -49,8 +49,6 @@ useEffect(() => {
   const fetchData = async () => {
     try {
       setLoading(true);
-
-      // Carga de datos iniciales (sin cambios)
       const [typesData, severitiesData, prioritiesData, statusesData, usersData] =
         await Promise.all([getTypes(), getSeverities(), getPriorities(), getStatuses(), getUsers()]);
 
