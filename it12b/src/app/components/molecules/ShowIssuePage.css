@@ -1,7 +1,11 @@
-.issuepage-root { display: flex; flex-direction: column; height: 100vh }
+.issuepage-root { display: flex; flex-direction: column; height: 100vh; }
 .issuepage-wrapper { 
   display: flex;
-  flex-direction: row;} 
+  flex-direction: row;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  width: auto; 
+} 
 .issuepage-header {  flex: 1;
   border-bottom: 2px solid #e5e7eb;
   margin-bottom: 1.5rem;
@@ -116,6 +120,22 @@
   border-left: 1px solid #e5e7eb;
   box-sizing: border-box;
 }
+.dropdown {
+          background: white;
+          border: 1px solid #d8dee9;
+          border-radius: 5px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+          z-index: 10;
+          margin-top: 4px;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+.dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: #334155;
+            font-size: 14px;
+            }
 .issuepage-status { display: flex; font-size: 12px; font-weight: lighter; color: #334155; margin-bottom: 1.5rem; }
 .issuepage-status-open { font-size: 1.5rem; font-weight: lighter; color: #000000; margin-bottom: 1.5rem; padding-right: 4px;}
 .issuepage-status-main {
@@ -126,9 +146,14 @@
   text-align: left;     
   display: inline-block;
 }
+.icon-arrow {
+          width: 16px;
+          height: 16px;
+          fill: black;
+        }
 .issuepage-sidebar-section { margin-bottom: 1.5rem; }
 .issuepage-sidebar-label { color: #64748b; font-size: 0.95rem; margin-bottom: 0.2rem; }
-.issuepage-sidebar-value { font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+.issuepage-sidebar-value { font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; color: #666b6d;}
 .issuepage-sidebar-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 0.5rem; }
 .issuepage-sidebar-assigned { background: #fff; border-radius: 4px; padding: 0.5rem; display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.7rem; }
 .issuepage-sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; }
