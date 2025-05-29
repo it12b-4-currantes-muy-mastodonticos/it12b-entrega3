@@ -82,3 +82,22 @@
 .issuepage-sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; }
 .issuepage-sidebar-buttons { display: flex; gap: 0.5rem; }
 .issuepage-sidebar-btn { background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0.3rem 0.8rem; cursor: pointer; font-size: 0.95rem; }
+.issuepage-sidebar-watchers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.issuepage-sidebar-watcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.issuepage-sidebar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}

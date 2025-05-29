@@ -12,12 +12,15 @@ import {
   getStatuses,
   getTypes,
   addWatcherToIssue,
+  getWatchersByIssueId,
+  getUserById,
 } from "../../apiCall";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import "./ShowIssuePage.css";
 
 export default function ShowIssuePage({ issueId, navigate }) {
+  const [watchers, setWatchers] = useState([]);
   const [issue, setIssue] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +60,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
         const commentsData = await getCommentsByIssueId(issueId);
         setComments(commentsData);
+
+        const watchersData = await getWatchersByIssueId(issueId);
+        setWatchers(watchersData);
 
         const [prioritiesData, severitiesData, statusesData, typesData] =
           await Promise.all([
@@ -490,7 +496,29 @@ export default function ShowIssuePage({ issueId, navigate }) {
           </div>
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">WATCHERS</div>
-            {/* Aquí iría la lista de watchers */}
+            <div className="issuepage-sidebar-watchers">
+              {watchers.length > 0 ? (
+                watchers.map((watcherId) => {
+                  console.log("Watcher ID:", watcherId);
+                  const watcher = users.find((user) => user.id === watcherId.id);
+                  console.log("Watcher:", watcher);
+                  return (
+                    <div key={watcherId} className="issuepage-sidebar-watcher">
+                      {watcher?.avatar_url && (
+                        <img
+                          src={watcher.avatar_url}
+                          alt={watcher.name}
+                          className="issuepage-sidebar-avatar"
+                        />
+                      )}
+                      <span>{watcher?.name || "Unknown User"}</span>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500">No watchers yet</p>
+              )}
+            </div>
             <div className="issuepage-sidebar-buttons">
               <button className="issuepage-sidebar-btn text-gray-500">+ Add watchers</button>
               <button className="issuepage-sidebar-btn text-gray-500"
