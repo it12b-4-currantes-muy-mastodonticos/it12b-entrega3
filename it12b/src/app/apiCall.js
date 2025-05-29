@@ -129,8 +129,10 @@ export const getWatchersByIssueId = async (issueId) => {
   return response.data;
 };
 
-export const addWatcherToIssue = async (issueId, watcherData) => {
-  const response = await api.post(`/issues/${issueId}/watchers`, watcherData);
+export const addWatcherToIssue = async (issueId, userId) => {
+  const response = await api.post(`/issues/${issueId}/watchers`, {
+    user_id: userId,
+  });
   return response.data;
 };
 
