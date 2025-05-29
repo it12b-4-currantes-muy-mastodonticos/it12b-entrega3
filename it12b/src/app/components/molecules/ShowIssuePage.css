@@ -359,6 +359,10 @@
   fill: none;
 }
 
+.issuepage-file-input {
+  display: none;
+}
+
 .issuepage-modal-delete:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -515,4 +519,26 @@
 }
 button {
   transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.issuepage-attachment-delete {
+  background: none;
+  border: none;
+  color: #ccc;
+  padding: 4px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.issuepage-attachment-delete:hover {
+  color: #e44057;
+}
+
+.issuepage-attachment-delete svg {
+  stroke: currentColor;
+}
+
+.issuepage-attachment-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

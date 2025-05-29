@@ -32,6 +32,21 @@ export const getAuthenticatedUser = async () => {
   return response.data;
 };
 
+export const updateUser = async (userId, formData) => {
+  const data = new FormData();
+  Object.keys(formData).forEach((key) => {
+  data.append(`user[${key}]`, formData[key]);
+  });
+
+  const response = await api.put(`/users/${userId}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
+
 // Issues
 export const getIssues = async (params = {}) => {
   const response = await api.get("/issues", { params });
@@ -60,7 +75,11 @@ export const bulkCreateIssues = async (issuesText) => {
 };
 
 export const updateIssue = async (id, issueData) => {
-  const response = await api.put(`/issues/${id}`, issueData);
+  const response = await api.put(`/issues/${id}`, issueData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 
@@ -68,6 +87,14 @@ export const deleteIssue = async (id) => {
   const response = await api.delete(`/issues/${id}`);
   return response.data;
 };
+
+export const deleteAttachment = async (issueId, blobId) => {
+  const response = await api.delete(`/issues/${issueId}/attachments`, {
+    params: { blob_id: blobId }
+  });
+  return response.data;
+};
+
 
 // Comments
 export const getCommentsByUserId = async (userId) => {
@@ -82,6 +109,12 @@ export const getCommentsByIssueId = async (issueId) => {
 
 export const createComment = async (issueId, commentData) => {
   const response = await api.post(`/issues/${issueId}/comments`, commentData);
+  return response.data;
+};
+
+// Assigned issues
+export const getAssignedIssuesByUserId = async (userId) => {
+  const response = await api.get(`/users/${userId}/assigned_issues`);
   return response.data;
 };
 

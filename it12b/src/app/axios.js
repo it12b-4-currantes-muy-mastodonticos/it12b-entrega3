@@ -22,6 +22,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const userId = localStorage.getItem("user_id");
+    console.debug(`[Axios] user_id obtenido del localStorage: ${userId}`);
     const token = tokenMap[userId];
     console.debug(`[Axios] Usando token para user_id=${userId}:`, token);
     if (token) {

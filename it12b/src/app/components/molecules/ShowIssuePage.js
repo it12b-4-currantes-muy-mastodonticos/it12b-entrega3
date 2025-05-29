@@ -14,10 +14,12 @@ import {
   addWatcherToIssue,
   getWatchersByIssueId,
   removeWatcherFromIssue
+  deleteAttachment,
 } from "../../apiCall";
 import { format } from "date-fns";
 import { es, se } from "date-fns/locale";
 import "./ShowIssuePage.css";
+import api from "../../axios.js";
 
 export default function ShowIssuePage({ issueId, navigate }) {
   const [watchers, setWatchers] = useState([]);
@@ -238,11 +240,10 @@ export default function ShowIssuePage({ issueId, navigate }) {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setFiles((prev) => [...prev, ...newFiles]);
-    }
-  };
+  if (e.target.files && e.target.files.length > 0) {
+    setFiles(prev => [...prev, ...Array.from(e.target.files)]);
+  }
+};
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -316,12 +317,36 @@ export default function ShowIssuePage({ issueId, navigate }) {
       formData.append("issue[attachments][]", file);
     });
 
-    const updatedIssue = await updateIssue(issueId, formData);
 
-    if (!response.ok) {
-      throw new Error("Error subiendo los archivos");
+    try {
+      const updatedIssue = await updateIssue(issueId, formData);
+      return updatedIssue;
+    } catch (error) {
+      console.error("Error uploading the attachments:", error);
+      throw new Error("Error uploading the attachments");
     }
-    return updatedIssue;
+  };
+
+  const deleteAttachments = async (at) => {
+    try {
+      setSavingField(true);
+      const attachment = issue.attachments.find(a => a.id === at);
+      if (!attachment) {
+        throw new Error("Attachment not found");
+      }
+      
+      await deleteAttachment(issueId, attachment.blob_id);
+      
+      setIssue(prevIssue => ({
+        ...prevIssue,
+        attachments: prevIssue.attachments.filter(a => a.id !== at)
+      }));
+    } catch (error) {
+      console.error("Error deleting attachment:", error);
+      alert("Error deleting attachment");
+    } finally {
+      setSavingField(false);
+    }
   };
 
   const handleFieldBlur = (field) => {
@@ -510,20 +535,23 @@ export default function ShowIssuePage({ issueId, navigate }) {
           <div className="issuepage-attachments">
             <div className="issuepage-attachments-header">
               <b>{issue.attachments?.length || 0} Attachments</b>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className="file-input"
-                multiple
-              />
-              <button
-                type="button"
-                onClick={triggerFileInput}
-                className="issuepage-attachments-add"
-              >
+              <div className="issuepage-attachments-add">
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="issuepage-file-input" 
+                  multiple 
+                />
+                <button
+                  type="button"
+                  onClick={triggerFileInput}
+                  className="issuepage-attachments-add"
+                >
                 +
-              </button>
+                </button>
+              </div>
+
             </div>
             <table className="issuepage-attachments-table">
               <tbody>
@@ -542,6 +570,22 @@ export default function ShowIssuePage({ issueId, navigate }) {
                     </td>
                     <td className="issuepage-attachment-size">
                       {(a.byte_size / 1024).toFixed(1)} KB
+                    </td>
+                    <td>
+                      <button 
+                        className="issuepage-attachment-delete" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          deleteAttachments(a.id);
+                        }}
+                        disabled={savingField}
+                      >
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                          <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
+                            stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
                     </td>
                   </tr>
                 ))}
