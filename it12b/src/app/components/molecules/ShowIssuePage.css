@@ -8,7 +8,7 @@
   flex-shrink: 0;
   height: 150px;
   padding-bottom: 2rem;}
-  
+
 .issuepage-back { color: #3b82f6; text-decoration: underline; font-size: 15px; }
 .issuepage-titleblock { font-size: 2rem; font-weight: bold; color: #1e293b; margin-top: 0.5rem; }
 .issuepage-id { color: #3b82f6; margin-right: 0.5rem; }
@@ -43,7 +43,7 @@
 .issuepage-comment-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; color: #64748b; border: 1px}
 .issuepage-comment-avatar { width: 20px; height: 20px; border-radius: 50%; }
 .issuepage-comment-date { margin-left: auto; font-size: 0.85rem; }
-.issuepage-comment-body { margin-left: 2.2rem; }
+.issuepage-comment-body { margin-left: 2.2rem; color: #898f8e }
 .issuepage-comment-form { padding: 1rem; border-top: 1px solid #e5e7eb; }
 .issuepage-comment-input { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 3px; color: #5f6a72; }
 .issuepage-comment-submit-button { background-color: #1eeeaf;

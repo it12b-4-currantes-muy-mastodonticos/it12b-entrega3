@@ -392,7 +392,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
                         )}
                       </span>
                     </div>
-                    <div className="issuepage-comment-body">{comment.body}</div>
+                    <div className="issuepage-comment-body">
+                      {comment.content}
+                    </div>
                   </div>
                 );
               })}
