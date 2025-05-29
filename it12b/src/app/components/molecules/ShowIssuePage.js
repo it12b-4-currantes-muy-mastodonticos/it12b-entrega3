@@ -78,6 +78,16 @@ export default function ShowIssuePage({ issueId, navigate }) {
     fetchData();
   }, [issueId]);
 
+  useEffect(() => {
+    if (
+      editingField === "status_id" &&
+      fieldValue !== "" &&
+      issue?.status_id !== parseInt(fieldValue)
+    ) {
+      saveField("status_id");
+    }
+  }, [fieldValue]);
+
   // Inline edit handlers
   const handleFieldClick = (field, value) => {
     setEditingField(field);
@@ -161,31 +171,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
       saveField(field);
     } else if (e.key === "Escape") {
       setEditingField(null);
-    }
-  };
-
-  const handleCheckboxChange = async (e) => {
-    setSavingField(true);
-    try {
-      const updated = { ...issue, blocked: e.target.checked };
-      const payload = {
-        title: updated.title,
-        description: updated.description?.body,
-        assigned_to_id: updated.assigned_to_id,
-        status_id: updated.status_id,
-        priority_id: updated.priority_id,
-        severity_id: updated.severity_id,
-        issue_type_id: updated.issue_type_id,
-        due_date: updated.due_date,
-        due_date_reason: updated.due_date_reason,
-        blocked: updated.blocked,
-      };
-      const updatedIssue = await updateIssue(issueId, { issue: payload });
-      setIssue(updatedIssue);
-    } catch (e) {
-      alert("Error guardando el campo");
-    } finally {
-      setSavingField(false);
     }
   };
 
@@ -394,7 +379,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 const user = users.find((u) => u.id === comment.user_id);
                 return (
                   <div key={comment.id} className="issuepage-comment">
-                    <div className="issuepage-comment-meta">
+                    <div className="issuepage-comment-wrapper">
                       {user?.avatar_url && (
                         <img
                           src={user.avatar_url}
@@ -402,17 +387,23 @@ export default function ShowIssuePage({ issueId, navigate }) {
                           className="issuepage-comment-avatar"
                         />
                       )}
-                      <span>{user?.name || "Usuario"}</span>
-                      <span className="issuepage-comment-date">
-                        {format(
-                          new Date(comment.created_at),
-                          "dd MMM yyyy HH:mm",
-                          { locale: es }
-                        )}
-                      </span>
-                    </div>
-                    <div className="issuepage-comment-body">
-                      {comment.content}
+                      <div className="issuepage-comment-text">
+                        <div className="issuepage-comment-meta">
+                          <span className="issuepage-comment-author">
+                            {user?.name || "Usuario"}
+                          </span>
+                          <span className="issuepage-comment-date">
+                            {format(
+                              new Date(comment.created_at),
+                              "dd MMM yyyy HH:mm",
+                              { locale: es }
+                            )}
+                          </span>
+                        </div>
+                        <div className="issuepage-comment-body">
+                          {comment.content}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -423,11 +414,46 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
         {/* SIDEBAR */}
         <aside className="issuepage-sidebar">
-          <div className="issuepage-status">
-            <span className="issuepage-status-main">
-              {issue.status?.name?.toUpperCase() || "OPEN"}
-            </span>
-          </div>
+          {editingField === "status_id" ? (
+            <select
+              value={fieldValue}
+              autoFocus
+              onChange={handleFieldChange}
+              onBlur={() => handleFieldBlur("status_id")}
+              onKeyDown={(e) => handleFieldKeyDown(e, "status_id")}
+              className="px-2 py-1 rounded text-xs font-medium"
+              style={{
+                backgroundColor: "#fff",
+                color: "#000",
+              }}
+              disabled={savingField}
+            >
+              {statuses.map((stat) => (
+                <option key={stat.id} value={stat.id}>
+                  {stat.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div
+              className="issuepage-status"
+              onClick={() => handleFieldClick("status_id", issue.status_id)}
+              title="Haz clic para cambiar el estado"
+            >
+              <span className="issuepage-status-open">
+                {issue.status?.open ? "OPEN" : "CLOSED"}
+              </span>
+              <span
+                className="issuepage-status-main"
+                style={{
+                  backgroundColor: issue.status?.color,
+                }}
+              >
+                {issue.status?.name?.toUpperCase()}
+              </span>
+            </div>
+          )}
+
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">type</div>
             <div className="issuepage-sidebar-value">
