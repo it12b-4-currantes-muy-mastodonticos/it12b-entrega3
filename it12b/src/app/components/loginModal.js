@@ -47,7 +47,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
     if (selectedUser) {
       // Guardar el usuario en localStorage
       localStorage.setItem("currentUser", JSON.stringify(selectedUser));
-      localStorage.setItem("currentUserId", selectedUser.id);
+      localStorage.setItem("user_id", selectedUser.id);
 
       // Llamar al callback de login
       onLogin(selectedUser);

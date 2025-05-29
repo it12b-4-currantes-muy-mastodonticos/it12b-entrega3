@@ -27,8 +27,12 @@ export const getIssueById = async (id) => {
   return response.data;
 };
 
-export const createIssue = async (issueData) => {
-  const response = await api.post("/issues", issueData);
+export const createIssue = async (formData) => {
+  const response = await api.post(`/issues`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 
