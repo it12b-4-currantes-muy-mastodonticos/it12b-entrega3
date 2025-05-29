@@ -101,7 +101,7 @@ export default function UsersIndexPage({ navigate }) {
                         navigate("EditProfile", { userId: user.id });
                       }}
                     >
-                      Edit Profile
+                      Edit Bio
                     </button>
                   </div>
                 )}
