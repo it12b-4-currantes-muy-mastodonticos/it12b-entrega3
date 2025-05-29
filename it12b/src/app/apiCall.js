@@ -1,5 +1,21 @@
 import api from "./axios.js";
 
+  api.interceptors.request.use(config => {
+    const userString = localStorage.getItem("currentUser");
+    if (userString) {
+      try {
+        const user = JSON.parse(userString);
+        if (user && user.token) {
+          // Ajusta el formato según lo que espere tu API
+          config.headers.Authorization = `Bearer ${user.token}`;
+        }
+      } catch (e) {
+        console.error("Error parsing user from localStorage:", e);
+      }
+    }
+    return config;
+  });
+
 // Users
 export const getUsers = async () => {
   const response = await api.get("/users");
@@ -27,8 +43,19 @@ export const getIssueById = async (id) => {
   return response.data;
 };
 
-export const createIssue = async (issueData) => {
-  const response = await api.post("/issues", issueData);
+export const createIssue = async (formData) => {
+  const response = await api.post(`/issues`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+export const bulkCreateIssues = async (issuesText) => {
+  const response = await api.post("/issues/bulk_create", {
+    bulk_issues: issuesText
+  });
   return response.data;
 };
 
