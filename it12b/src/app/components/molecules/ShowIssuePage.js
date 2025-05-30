@@ -551,7 +551,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 dangerouslySetInnerHTML={{
                   __html:
                     issue.description?.body ||
-                    "<em class='text-gray-500'>Sin descripción</em>",
+                    "<em class='text-gray-500'>No description</em>",
                 }}
               />
             )}
@@ -645,7 +645,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 className="issuepage-comment-submit-button"
                 disabled={submitting}
               >
-                {submitting ? "Enviando..." : "Agregar comentario"}
+                {submitting ? "Sending..." : "Add comment"}
               </button>
             </form>
             <div className="issuepage-comments-list">

@@ -20,37 +20,37 @@ export default function IssueList({ issues, onIssueClick, onSortChange, sortFiel
             className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
             onClick={() => handleSort("issue")}
           >
-            ID / Título {sortField === "issue" && (sortDirection === "asc" ? "↑" : "↓")}
+            ID / Title {sortField === "issue" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
           <th
             className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
             onClick={() => handleSort("type")}
           >
-            Tipo {sortField === "type" && (sortDirection === "asc" ? "↑" : "↓")}
+            Type {sortField === "type" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
           <th
             className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
             onClick={() => handleSort("severity")}
           >
-            Severidad {sortField === "severity" && (sortDirection === "asc" ? "↑" : "↓")}
+            Severity {sortField === "severity" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
           <th
             className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
             onClick={() => handleSort("priority")}
           >
-            Prioridad {sortField === "priority" && (sortDirection === "asc" ? "↑" : "↓")}
+            Priority {sortField === "priority" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
           <th
             className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
             onClick={() => handleSort("status")}
           >
-            Estado {sortField === "status" && (sortDirection === "asc" ? "↑" : "↓")}
+            Status {sortField === "status" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
           <th
             className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
             onClick={() => handleSort("updated_at")}
           >
-            Actualizado {sortField === "updated_at" && (sortDirection === "asc" ? "↑" : "↓")}
+            Updated at {sortField === "updated_at" && (sortDirection === "asc" ? "↑" : "↓")}
           </th>
         </tr>
       </thead>
