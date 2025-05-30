@@ -978,7 +978,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                     />
                   )}
                   <span>{assignedUser?.name || "Unknown User"}</span>
-                  <button
+                  {currentUser && (<button
                     className="absolute right-0 top-1/2 transform -translate-y-1/2 text-[#62626e] hidden group-hover:flex items-center justify-center w-6 h-6 text-white rounded-full hover:text-red-600"
                     onClick={async () => {
                       try {
@@ -995,26 +995,28 @@ export default function ShowIssuePage({ issueId, navigate }) {
                     }}
                   >
                     ✖
-                  </button>
+                  </button>)}
                 </div>
               ) : (
                 <p className="text-gray-500"></p>
               )}
             </div>
-            <div className="issuepage-sidebar-buttons">
-              <button
-                className="issuepage-sidebar-btn text-gray-500"
-                onClick={openAssignModal}
-              >
-                + Add assigned
-              </button>
-              <button
-                className="issuepage-sidebar-btn text-gray-500"
-                onClick={handleAssignToggle}
-              >
-                {"Assign to me"}
-              </button>
-            </div>
+            {currentUser && (
+              <div className="issuepage-sidebar-buttons">
+                <button
+                  className="issuepage-sidebar-btn text-gray-500"
+                  onClick={openAssignModal}
+                >
+                  + Add assigned
+                </button>
+                <button
+                  className="issuepage-sidebar-btn text-gray-500"
+                  onClick={handleAssignToggle}
+                >
+                  {"Assign to me"}
+                </button>
+              </div>
+            )}
           </div>
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">WATCHERS</div>
@@ -1039,7 +1041,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                         />
                       )}
                       <span>{watcher?.name || "Unknown User"}</span>
-                      <button
+                      {currentUser && (<button
                         className="absolute right-0 top-1/2 transform -translate-y-1/2 text-[#62626e] hidden group-hover:flex items-center justify-center w-6 h-6 text-white rounded-full hover:text-red-600"
                         onClick={async () => {
                           try {
@@ -1054,7 +1056,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                         }}
                       >
                         ✖
-                      </button>
+                      </button>)}
                     </div>
                   );
                 })
@@ -1062,22 +1064,24 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 <p className="text-gray-500"></p>
               )}
             </div>
-            <div className="issuepage-sidebar-buttons">
-              <button
-                className="issuepage-sidebar-btn text-gray-500"
-                onClick={openModal}
-              >
-                + Add watchers
-              </button>
-              <button
-                className="issuepage-sidebar-btn text-gray-500"
-                onClick={handleWatchToggle}
-              >
-                {watchers.some((watcher) => watcher.id === currentUser?.id)
-                  ? "👁 Unwatch"
-                  : "👁 Watch"}
-              </button>
-            </div>
+            {currentUser && (
+              <div className="issuepage-sidebar-buttons">
+                <button
+                  className="issuepage-sidebar-btn text-gray-500"
+                  onClick={openModal}
+                >
+                  + Add watchers
+                </button>
+                <button
+                  className="issuepage-sidebar-btn text-gray-500"
+                  onClick={handleWatchToggle}
+                >
+                  {watchers.some((watcher) => watcher.id === currentUser?.id)
+                    ? "👁 Unwatch"
+                    : "👁 Watch"}
+                </button>
+              </div>
+            )}
             <div className="issuepage-sidebar-label">DUE DATE</div>
             {issue.due_date ? (
               <>
@@ -1092,7 +1096,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                       {issue.due_date_reason}
                     </div>
                   )}
-                  <button
+                  {currentUser && (<button
                     className={`issuepage-sidebar-btn ${
                       isIssueClosed() ? "issuepage-btn-disabled" : ""
                     }`}
@@ -1100,11 +1104,11 @@ export default function ShowIssuePage({ issueId, navigate }) {
                     disabled={isIssueClosed()}
                   >
                     Edit due date
-                  </button>
+                  </button>)}
                 </div>
               </>
             ) : (
-              <button
+              <>{currentUser && (<button
                 className="issuepage-sidebar-btn"
                 onClick={handleOpenDueDateModal}
               >
@@ -1124,12 +1128,13 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   />
                 </svg>
                 Set due date
-              </button>
+              </button>)}
+              </>
             )}
           </div>
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label"></div>
-            <button
+            {currentUser && (<button
               onClick={() => setShowDeleteIssueModal(true)}
               className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 mt-2"
               title="Delete this issue permanently"
@@ -1145,7 +1150,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 />
               </svg>
               Delete Issue
-            </button>
+            </button>)}
           </div>
         </aside>
       </div>
