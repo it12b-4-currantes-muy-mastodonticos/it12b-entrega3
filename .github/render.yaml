@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: it12b-taiga
+    env: node
+    buildCommand: cd it12b && npm install && npm run build
+    startCommand: cd it12b && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production

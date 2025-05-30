@@ -25,7 +25,13 @@ export default function IssuesIndexPage({ navigate }) {
   const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => {
+  if (typeof localStorage !== "undefined") {
+    const storedUser = localStorage.getItem("currentUser");
+    return storedUser ? JSON.parse(storedUser) : null;
+  }
+  return null;
+});
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     type: [],
@@ -50,7 +56,7 @@ useEffect(() => {
     try {
       setLoading(true);
 
-      // Carga de datos iniciales (sin cambios)
+      // Initial data loading (no changes)
       const [typesData, severitiesData, prioritiesData, statusesData, usersData] =
         await Promise.all([getTypes(), getSeverities(), getPriorities(), getStatuses(), getUsers()]);
 
@@ -62,14 +68,14 @@ useEffect(() => {
       setCreatedBy(usersData);
       setUsers(usersData);
 
-      // Parámetros para la API (sin incluir filter_unassigned)
+      // API parameters (without filter_unassigned)
       const params = {
         sort: sort.field,
         direction: sort.direction,
         search: filters.search || undefined,
       };
 
-      // Añadir los filtros estándar
+      // Add standard filters
       if (filters.type.length > 0) params["filter_type[]"] = filters.type;
       if (filters.severity.length > 0) params["filter_severity[]"] = filters.severity;
       if (filters.priority.length > 0) params["filter_priority[]"] = filters.priority;
@@ -77,10 +83,10 @@ useEffect(() => {
       if (filters.assignedTo.length > 0) params["filter_assignee[]"] = filters.assignedTo;
       if (filters.createdBy.length > 0) params["filter_creator[]"] = filters.createdBy;
 
-      // Obtener issues desde la API
+      // Get issues from API
       const issuesData = await getIssues(params);
 
-      // Procesar las issues para añadir detalles de usuario
+      // Process issues to add user details
       const processedIssues = issuesData.map((issue) => {
         if (issue.assigned_to_id) {
           const assignedUser = usersData.find(
@@ -93,10 +99,10 @@ useEffect(() => {
         return issue;
       });
 
-      // FILTRO MANUAL: Si está activado el filtro "Sin asignar"
+      // MANUAL FILTER: If "Unassigned" filter is active
       let filteredIssues = processedIssues;
       if (filters.unassigned) {
-        // Filtrar solo las issues que no tienen assigned_to_id
+        // Filter only issues without assigned_to_id
         filteredIssues = processedIssues.filter(issue => !issue.assigned_to_id);
       }
 
@@ -136,15 +142,14 @@ useEffect(() => {
     try {
       setLoading(true);
 
-      // Estructura correcta para el PUT request
+      // Correct structure for PUT request
       const updateData = {
         issue: {
           assigned_to_id: userId,
         },
       };
 
-      console.log("Enviando actualización:", updateData);
-      //console.log(currentUser);
+      console.log("Sending update:", updateData);
       await updateIssue(currentIssueId, updateData);
 
       const assignedUser = users.find((user) => user.id === userId);
@@ -164,27 +169,27 @@ useEffect(() => {
       setShowAssignPopup(false);
       setCurrentIssueId(null);
     } catch (error) {
-      console.error("Error al asignar usuario:", error);
-      // Mostrar detalles adicionales del error para depuración
+      console.error("Error assigning user:", error);
+      // Show additional error details for debugging
       if (error.response) {
-        console.error("Respuesta del servidor:", error.response.data);
-        console.error("Estado HTTP:", error.response.status);
+        console.error("Server response:", error.response.data);
+        console.error("HTTP Status:", error.response.status);
       }
     } finally {
       setLoading(false);
     }
   };
 
-    // Añade esta función antes del return del componente
+    // Add this function before the component return
   const getSortedIssues = () => {
-    // Si estamos ordenando por assigned_to_id y tenemos filtro unassigned
+    // If we're sorting by assigned_to_id and have unassigned filter
     if (sort.field === "assigned_to_id" && filters.unassigned) {
       return [...issues].sort((a, b) => {
-        // Convertir a números o strings vacíos para comparación
+        // Convert to numbers or empty strings for comparison
         const aValue = a.assigned_to_id || "";
         const bValue = b.assigned_to_id || "";
 
-        // Ordenar
+        // Sort
         if (aValue === bValue) return 0;
         if (sort.direction === "asc") {
           return aValue < bValue ? -1 : 1;
@@ -194,7 +199,7 @@ useEffect(() => {
       });
     }
 
-    // Para cualquier otro caso, usar las issues ya ordenadas por la API
+    // For any other case, use issues already sorted by API
     return issues;
   };
 
@@ -206,7 +211,7 @@ useEffect(() => {
 
       const bulkIssuesText = issuesData.join("\n");
 
-      console.log("Enviando bulk insert:", bulkIssuesText);
+      console.log("Sending bulk insert:", bulkIssuesText);
 
       const result = await bulkCreateIssues(bulkIssuesText);
 
@@ -216,34 +221,34 @@ useEffect(() => {
         search: filters.search || undefined,
       };
 
-      // Añadir los filtros seleccionados
+      // Add selected filters
       if (filters.type.length > 0) params["filter_type[]"] = filters.type;
       if (filters.severity.length > 0) params["filter_severity[]"] = filters.severity;
       if (filters.priority.length > 0) params["filter_priority[]"] = filters.priority;
       if (filters.status.length > 0) params["filter_status[]"] = filters.status;
       if (filters.assignedTo.length > 0) params["filter_assignee[]"] = filters.assignedTo;
       if (filters.createdBy.length > 0) params["filter_creator[]"] = filters.createdBy;
-      // Añadir filtro para issues sin asignar
+      // Add filter for unassigned issues
       if (filters.unassigned) params.filter_unassigned = true;
 
-      // Recargar las issues
+      // Reload issues
       const updatedIssues = await getIssues(params);
       setIssues(updatedIssues);
 
-      // Cierra el modal
+      // Close modal
       setShowBulkInsertModal(false);
 
-      // Muestra una notificación de éxito con el número de issues creadas
-      // Asumiendo que la API devuelve el número de issues creadas o se puede calcular
+      // Show success notification with number of issues created
+      // Assuming the API returns the number of issues created or can be calculated
       const createdCount = result?.created_count || issuesData.length;
-      alert(`Se han creado ${createdCount} issues correctamente.`);
+      alert(`${createdCount} issues have been created successfully.`);
     } catch (error) {
-      console.error("Error en bulk insert:", error);
+      console.error("Error in bulk insert:", error);
       if (error.response) {
-        console.error("Respuesta del servidor:", error.response.data);
-        console.error("Estado HTTP:", error.response.status);
+        console.error("Server response:", error.response.data);
+        console.error("HTTP Status:", error.response.status);
       }
-      alert("Error al crear las issues. Por favor, inténtelo de nuevo.");
+      alert("Error creating issues. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -257,7 +262,7 @@ useEffect(() => {
     }));
   };
 
-  // Calcular si hay filtros activos para mostrar un indicador en el botón
+  // Calculate if there are active filters to show an indicator on the button
   const hasActiveFilters = () => {
     return (
       filters.type.length > 0 ||
@@ -272,14 +277,33 @@ useEffect(() => {
 
   return (
     <div className="container mx-auto px-4 py-8 bg-white">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Issues</h1>
+      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow border border-gray-100">
+  <h1 className="text-3xl font-bold text-gray-900">Issues</h1>
 
-      {/* Barra de búsqueda y botones */}
+  {currentUser && (
+    <div className="flex items-center gap-2">
+      {currentUser.avatar_url ? (
+        <img
+          src={currentUser.avatar_url}
+          alt={currentUser.name}
+          className="w-8 h-8 rounded-full"
+        />
+      ) : (
+        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs">
+          {currentUser.name?.charAt(0) || "?"}
+        </div>
+      )}
+      <span className="text-gray-900 font-medium">{currentUser.name}</span>
+    </div>
+  )}
+</div>
+
+      {/* Search bar and buttons */}
       <div className="mb-6 bg-white p-4 rounded-lg shadow border border-gray-100">
         <div className="flex flex-wrap items-center gap-4 mb-4">
           <input
             type="text"
-            placeholder="Buscar issues..."
+            placeholder="Search issues..."
             className="px-4 py-2 border rounded-md flex-grow text-gray-800"
             value={filters.search}
             onChange={(e) => handleFilterChange("search", e.target.value)}
@@ -289,23 +313,52 @@ useEffect(() => {
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             onClick={() => navigate("NewIssue")}
           >
-            Nueva Issue
+            New Issue
           </button>
 
-          {/* Añade este botón para bulk insert */}
+          {/* Add this button for bulk insert */}
           <button
             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
             onClick={() => setShowBulkInsertModal(true)}
           >
-            Crear Múltiples Issues
+            Create Multiple Issues
           </button>
 
+          {currentUser ? (
+            <button
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+              onClick={() => {
+                setCurrentUser(null);
+                localStorage.removeItem("currentUser");
+                localStorage.removeItem("currentUserId");
+                localStorage.removeItem("user_id");
+                console.log("User logged out: ", localStorage);
+              }}
+            >
+              Log Out
+            </button>
+          ) : (
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              onClick={() => setShowLoginModal(true)}
+            >
+              Log In
+            </button>
+          )}
+
           <button
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-            onClick={() => setShowLoginModal(true)}
+            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
+            onClick={() => navigate("UsersIndex")}
+            title="Users Directory"
           >
-            Iniciar Sesión
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Users Directory
+            </div>
           </button>
+
           <button
             className={`flex items-center gap-2 px-4 py-2 rounded-md ${
               showFilters
@@ -317,13 +370,13 @@ useEffect(() => {
             {hasActiveFilters() && (
               <span className="inline-block w-2 h-2 rounded-full bg-white"></span>
             )}
-            Filtros
+            Filters
           </button>
-          {/* Botón de configuración */}
+          {/* Settings button */}
           <button
               className="bg-gray-700 text-white p-2 rounded-md hover:bg-gray-800"
               onClick={() => navigate("AdminSettings")}
-              title="Configuración"
+              title="Settings"
           >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -332,12 +385,12 @@ useEffect(() => {
           </button>
         </div>
 
-        {/* Filtros desplegables */}
+        {/* Dropdown filters */}
         {showFilters && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            {/* Filtro por tipo */}
+            {/* Type filter */}
             <div>
-              <h3 className="font-medium mb-2 text-gray-900">Tipo</h3>
+              <h3 className="font-medium mb-2 text-gray-900">Type</h3>
               <div className="max-h-32 overflow-y-auto">
                 {types.map((type) => (
                   <label key={type.id} className="flex items-center gap-2 mb-1">
@@ -358,9 +411,9 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Filtro por severidad */}
+            {/* Severity filter */}
             <div>
-              <h3 className="font-medium mb-2 text-gray-900">Severidad</h3>
+              <h3 className="font-medium mb-2 text-gray-900">Severity</h3>
               <div className="max-h-32 overflow-y-auto">
                 {severities.map((severity) => (
                   <label
@@ -386,9 +439,9 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Filtro por prioridad */}
+            {/* Priority filter */}
             <div>
-              <h3 className="font-medium mb-2 text-gray-900">Prioridad</h3>
+              <h3 className="font-medium mb-2 text-gray-900">Priority</h3>
               <div className="max-h-32 overflow-y-auto">
                 {priorities.map((priority) => (
                   <label
@@ -414,9 +467,9 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Filtro por estado */}
+            {/* Status filter */}
             <div>
-              <h3 className="font-medium mb-2 text-gray-900">Estado</h3>
+              <h3 className="font-medium mb-2 text-gray-900">Status</h3>
               <div className="max-h-32 overflow-y-auto">
                 {statuses.map((status) => (
                   <label
@@ -440,11 +493,11 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Filtro por asignado a */}
+            {/* Assigned to filter */}
             <div>
-              <h3 className="font-medium mb-2 text-gray-900">Asignado a</h3>
+              <h3 className="font-medium mb-2 text-gray-900">Assigned to</h3>
               <div className="max-h-32 overflow-y-auto">
-                {/* Agregar opción "Sin asignar" */}
+                {/* Add "Unassigned" option */}
                 <label className="flex items-center gap-2 mb-1">
                   <input
                     type="checkbox"
@@ -453,7 +506,7 @@ useEffect(() => {
                   />
                   <span className="flex items-center gap-2 text-gray-800">
                     <span className="inline-block w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center">-</span>
-                    Sin asignar
+                    Unassigned
                   </span>
                 </label>
                 {assignedTo.map((user) => (
@@ -480,9 +533,9 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Filtro por creado por */}
+            {/* Created by filter */}
             <div>
-              <h3 className="font-medium mb-2 text-gray-900">Creado por</h3>
+              <h3 className="font-medium mb-2 text-gray-900">Created by</h3>
               <div className="max-h-32 overflow-y-auto">
                 {createdBy.map((user) => (
                   <label key={user.id} className="flex items-center gap-2 mb-1">
@@ -514,11 +567,11 @@ useEffect(() => {
       <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
         {loading ? (
           <div className="p-8 text-center text-gray-900">
-            Cargando issues...
+            Loading issues...
           </div>
         ) : issues.length === 0 ? (
           <div className="p-8 text-center text-gray-900">
-            No se encontraron issues
+            No issues found
           </div>
         ) : (
           <table className="min-w-full">
@@ -528,7 +581,7 @@ useEffect(() => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSortChange("title")}
                 >
-                  ID / Título{" "}
+                  ID / Title{" "}
                   {sort.field === "title" &&
                     (sort.direction === "asc" ? "↑" : "↓")}
                 </th>
@@ -536,7 +589,7 @@ useEffect(() => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSortChange("type")}
                 >
-                  Tipo{" "}
+                  Type{" "}
                   {sort.field === "type" &&
                     (sort.direction === "asc" ? "↑" : "↓")}
                 </th>
@@ -544,7 +597,7 @@ useEffect(() => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSortChange("severity")}
                 >
-                  Severidad{" "}
+                  Severity{" "}
                   {sort.field === "severity" &&
                     (sort.direction === "asc" ? "↑" : "↓")}
                 </th>
@@ -552,7 +605,7 @@ useEffect(() => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSortChange("priority")}
                 >
-                  Prioridad{" "}
+                  Priority{" "}
                   {sort.field === "priority" &&
                     (sort.direction === "asc" ? "↑" : "↓")}
                 </th>
@@ -560,7 +613,7 @@ useEffect(() => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSortChange("status")}
                 >
-                  Estado{" "}
+                  Status{" "}
                   {sort.field === "status" &&
                     (sort.direction === "asc" ? "↑" : "↓")}
                 </th>
@@ -568,7 +621,7 @@ useEffect(() => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSortChange("updated_at")}
                 >
-                  Actualizado{" "}
+                  Updated{" "}
                   {sort.field === "updated_at" &&
                     (sort.direction === "asc" ? "↑" : "↓")}
                 </th>
@@ -576,7 +629,7 @@ useEffect(() => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSortChange("assigned_to_id")}
                 >
-                  Asignado a{" "}
+                  Assigned to{" "}
                   {sort.field === "assigned_to_id" && (sort.direction === "asc" ? "↑" : "↓")}
                 </th>
                </tr>
@@ -662,13 +715,13 @@ useEffect(() => {
                         </>
                       ) : (
                         <span className="text-gray-500 italic">
-                          Sin asignar
+                          Unassigned
                         </span>
                       )}
                       <button
                         className="ml-2 p-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
                         onClick={(e) => {
-                          e.stopPropagation(); // Evitar que se navegue a la issue al hacer clic en este botón
+                          e.stopPropagation(); // Prevent navigating to the issue when clicking this button
                           setCurrentIssueId(issue.id);
                           setShowAssignPopup(true);
                         }}
@@ -697,7 +750,7 @@ useEffect(() => {
         )}
       </div>
 
-      {/* Modal de login */}
+      {/* Login modal */}
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
@@ -706,39 +759,12 @@ useEffect(() => {
           localStorage.setItem("currentUser", JSON.stringify(user));
         }}
       />
-
-      {/* Opcional: Mostrar el usuario actual */}
-      {currentUser && (
-        <div className="fixed bottom-4 right-4 bg-white p-3 rounded-lg shadow-md flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden">
-            {currentUser.avatar && (
-              <img
-                src={currentUser.avatar_url}
-                alt={currentUser.name}
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          <div>
-            <div className="font-medium text-gray-900">{currentUser.name}</div>
-            <button
-              className="text-red-600 text-sm hover:text-red-800 font-medium"
-              onClick={() => {
-                setCurrentUser(null);
-                localStorage.removeItem("currentUser");
-              }}
-            >
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
-      )}
       {showAssignPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-gray-900">
-                Asignar usuario
+                Assign user
               </h3>
               <button
                 className="text-gray-500 hover:text-gray-700"
@@ -761,18 +787,6 @@ useEffect(() => {
               </button>
             </div>
 
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Buscar usuario..."
-                className="w-full px-4 py-2 border rounded-md text-gray-800"
-                onChange={(e) => {
-                  // Aquí podrías implementar una búsqueda local de usuarios
-                  // Por simplicidad, no lo implementaremos ahora
-                }}
-              />
-            </div>
-
             <div className="space-y-2 max-h-64 overflow-y-auto">
               <div
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
@@ -781,7 +795,7 @@ useEffect(() => {
                 <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
                   <span className="text-gray-600">-</span>
                 </div>
-                <span className="text-gray-800">Sin asignar</span>
+                <span className="text-gray-800">Unassigned</span>
               </div>
 
               {assignedTo.map((user) => (
