@@ -309,20 +309,28 @@ useEffect(() => {
             onChange={(e) => handleFilterChange("search", e.target.value)}
           />
 
+          {currentUser ? (
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             onClick={() => navigate("NewIssue")}
           >
             New Issue
           </button>
+          ) : (
+            <></>
+          )}
 
           {/* Add this button for bulk insert */}
+          {currentUser ? (
           <button
             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
             onClick={() => setShowBulkInsertModal(true)}
           >
             Create Multiple Issues
           </button>
+          ) : (
+            <></>
+          )}
 
           {currentUser ? (
             <button
