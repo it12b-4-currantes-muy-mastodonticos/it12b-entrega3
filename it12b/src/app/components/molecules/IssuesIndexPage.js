@@ -309,20 +309,28 @@ useEffect(() => {
             onChange={(e) => handleFilterChange("search", e.target.value)}
           />
 
+          {currentUser ? (
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             onClick={() => navigate("NewIssue")}
           >
             New Issue
           </button>
+          ) : (
+            <></>
+          )}
 
           {/* Add this button for bulk insert */}
+          {currentUser ? (
           <button
             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
             onClick={() => setShowBulkInsertModal(true)}
           >
             Create Multiple Issues
           </button>
+          ) : (
+            <></>
+          )}
 
           {currentUser ? (
             <button
@@ -718,6 +726,7 @@ useEffect(() => {
                           Unassigned
                         </span>
                       )}
+                      {currentUser ? (
                       <button
                         className="ml-2 p-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
                         onClick={(e) => {
@@ -741,6 +750,7 @@ useEffect(() => {
                           />
                         </svg>
                       </button>
+                      ) : ([])}
                     </div>
                   </td>
                 </tr>
