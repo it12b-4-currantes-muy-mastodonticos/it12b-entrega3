@@ -279,9 +279,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
   const handleFieldChange = (e) => {
     setFieldValue(e.target.value);
-      if (editingField === "title" && e.target.value.trim() !== "") {
-        return;
-      }
+    if (editingField === "title" && e.target.value.trim() !== "") {
+      return;
+    }
   };
 
   const handleFileChange = (e) => {
@@ -298,9 +298,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
     if (!issue) return;
     setSavingField(true);
 
-      if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
-        return;
-      }
+    if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
+      return;
+    }
 
     try {
       let updated = { ...issue };
@@ -407,9 +407,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const handleFieldKeyDown = (e, field) => {
     if (e.key === "Enter") {
       e.preventDefault();
-        if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
-          return;
-        }
+      if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
+        return;
+      }
       saveField(field);
     } else if (e.key === "Escape") {
       setEditingField(null);
@@ -520,35 +520,49 @@ export default function ShowIssuePage({ issueId, navigate }) {
           <div className="issuepage-titleblock">
             <span>
               {editingField === "title" ? (
-                <input
-                  type="text"
-                  value={fieldValue}
-                  autoFocus
-                  onChange={handleFieldChange}
-                  onBlur={() => handleFieldBlur("title")}
-                  onKeyDown={(e) => handleFieldKeyDown(e, "title")}
-                  className="issuepage-title"
-                  disabled={savingField}
-                  required
-                />
+                currentUser ? (
+                  <input
+                    type="text"
+                    value={fieldValue}
+                    autoFocus
+                    onChange={handleFieldChange}
+                    onBlur={() => handleFieldBlur("title")}
+                    onKeyDown={(e) => handleFieldKeyDown(e, "title")}
+                    className="issuepage-title"
+                    disabled={savingField}
+                    required
+                  />
+                ) : (
+                  // Si alguien intenta editar sin estar logueado, mostramos el título en modo lectura
+                  <h1 className="issuepage-title">
+                    <span className="issuepage-id">#{issue.id}</span>
+                    {issue.title}
+                  </h1>
+                )
               ) : (
                 <h1
                   className="issuepage-title"
-                  onClick={() => handleFieldClick("title", issue.title)}
-                  title="Click to edit"
+                  onClick={() =>
+                    currentUser && handleFieldClick("title", issue.title)
+                  }
+                  title={
+                    currentUser
+                      ? "Haz click para editar"
+                      : "Debes iniciar sesión para editar"
+                  }
                 >
                   <span className="issuepage-id">#{issue.id}</span>
                   {issue.title}
                   {savingField && editingField === null && (
                     <span className="ml-2 text-xs text-gray-400">
-                      Saving...
+                      Guardando...
                     </span>
                   )}
                 </h1>
               )}
             </span>
           </div>
-          
+
           <span className="issuepage-type">ISSUE</span>
 
           <div className="issuepage-meta">
@@ -574,22 +588,38 @@ export default function ShowIssuePage({ issueId, navigate }) {
         <div className="issuepage-content">
           <div className="issuepage-description">
             {editingField === "description" ? (
-              <textarea
-                value={fieldValue}
-                autoFocus
-                onChange={handleFieldChange}
-                onBlur={() => handleFieldBlur("description")}
-                onKeyDown={(e) => handleFieldKeyDown(e, "description")}
-                className="issuepage-description-body"
-                disabled={savingField}
-              />
+              currentUser ? (
+                <textarea
+                  value={fieldValue}
+                  autoFocus
+                  onChange={handleFieldChange}
+                  onBlur={() => handleFieldBlur("description")}
+                  onKeyDown={(e) => handleFieldKeyDown(e, "description")}
+                  className="issuepage-description-body"
+                  disabled={savingField}
+                />
+              ) : (
+                <div
+                  className="issuepage-description-body"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      issue.description?.body ||
+                      "<em class='text-gray-500'>No description</em>",
+                  }}
+                />
+              )
             ) : (
               <div
                 className="issuepage-description-body"
                 onClick={() =>
+                  currentUser &&
                   handleFieldClick("description", issue.description?.body)
                 }
-                title="Haz click para editar"
+                title={
+                  currentUser
+                    ? "Haz click para editar"
+                    : "Debes iniciar sesión para editar"
+                }
                 dangerouslySetInnerHTML={{
                   __html:
                     issue.description?.body ||
@@ -603,22 +633,24 @@ export default function ShowIssuePage({ issueId, navigate }) {
           <div className="issuepage-attachments">
             <div className="issuepage-attachments-header">
               <b>{issue.attachments?.length || 0} Attachments</b>
-              <div className="issuepage-attachments-add">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  className="issuepage-file-input"
-                  multiple
-                />
-                <button
-                  type="button"
-                  onClick={triggerFileInput}
-                  className="issuepage-attachments-add"
-                >
-                  +
-                </button>
-              </div>
+              {currentUser ? (
+                <div className="issuepage-attachments-add">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className="issuepage-file-input"
+                    multiple
+                  />
+                  <button
+                    type="button"
+                    onClick={triggerFileInput}
+                    className="issuepage-attachments-add"
+                  >
+                    +
+                  </button>
+                </div>
+              ) : null}
             </div>
             <table className="issuepage-attachments-table">
               <tbody>
@@ -672,24 +704,45 @@ export default function ShowIssuePage({ issueId, navigate }) {
               <b>{comments.length} Comments</b>
             </div>
             <form
-              onSubmit={handleAddComment}
+              onSubmit={(e) => {
+                if (!currentUser) {
+                  e.preventDefault();
+                  alert("Debes iniciar sesión para comentar");
+                  return;
+                }
+                handleAddComment(e);
+              }}
               className="issuepage-comment-form"
             >
               <input
                 className="issuepage-comment-input"
-                placeholder="Type a new comment here"
+                placeholder={
+                  currentUser
+                    ? "Type a new comment here"
+                    : "Debes iniciar sesión para comentar"
+                }
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                disabled={submitting}
+                disabled={submitting || !currentUser}
               />
-              <button
-                type="submit"
-                className="issuepage-comment-submit-button"
-                disabled={submitting}
-              >
-                {submitting ? "Sending..." : "Add comment"}
-              </button>
+              {currentUser ? (
+                <button
+                  type="submit"
+                  className="issuepage-comment-submit-button"
+                  disabled={submitting || !currentUser}
+                  title={
+                    currentUser
+                      ? submitting
+                        ? "Sending..."
+                        : "Add comment"
+                      : "Debes iniciar sesión para comentar"
+                  }
+                >
+                  {submitting ? "Sending..." : "Add comment"}
+                </button>
+              ) : null}
             </form>
+
             <div className="issuepage-comments-list">
               {comments.map((comment) => {
                 const user = users.find((u) => u.id === comment.user_id);
@@ -1139,7 +1192,12 @@ export default function ShowIssuePage({ issueId, navigate }) {
               className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 mt-2"
               title="Delete this issue permanently"
             >
-              <svg viewBox="0 0 24 24" width="16" height="16" className="inline-block">
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                className="inline-block"
+              >
                 <path
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                   stroke="currentColor"
@@ -1355,7 +1413,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
             </div>
             <div className="issuepage-delete-confirm-content">
               <p>Are you sure you want to delete this issue?</p>
-              <p className="text-red-500 font-medium mt-2">This action cannot be undone.</p>
+              <p className="text-red-500 font-medium mt-2">
+                This action cannot be undone.
+              </p>
             </div>
             <div className="issuepage-delete-confirm-actions">
               <button
