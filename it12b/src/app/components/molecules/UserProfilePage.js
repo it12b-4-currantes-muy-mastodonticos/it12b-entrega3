@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
   getUserById,
   getAssignedIssuesByUserId,
-  getWatchersByUserId,
+  getWatchedIssuesByUserId,
   getCommentsByUserId,
 } from "../../apiCall";
 import IssueList from "../organisms/IssueList";
@@ -16,8 +16,15 @@ export default function UserProfilePage({ userId, navigate }) {
   const [watchedIssues, setWatchedIssues] = useState([]);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [assignedSort, setAssignedSort] = useState({ field: "issue", direction: "asc" });
+  const [watchedSort, setWatchedSort] = useState({ field: "issue", direction: "asc" });
+  const [currentUserId, setCurrentUserId] = useState(null);
 
+  
   useEffect(() => {
+    const loggedUserId = localStorage.getItem("currentUserId") || localStorage.getItem("user_id");
+    setCurrentUserId(loggedUserId);
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -25,8 +32,8 @@ export default function UserProfilePage({ userId, navigate }) {
         setUser(userData);
 
         const [assigned, watched, userComments] = await Promise.all([
-          getAssignedIssuesByUserId(userId),
-          getWatchersByUserId(userId),
+          getAssignedIssuesByUserId(userId, assignedSort.field, assignedSort.direction),
+          getWatchedIssuesByUserId(userId, watchedSort.field, watchedSort.direction),
           getCommentsByUserId(userId),
         ]);
 
@@ -41,7 +48,7 @@ export default function UserProfilePage({ userId, navigate }) {
     };
 
     fetchData();
-  }, [userId]);
+  }, [userId, assignedSort, watchedSort]);
 
   if (loading) {
     return <div className="container mx-auto px-4 py-8">Cargando perfil...</div>;
@@ -54,9 +61,19 @@ export default function UserProfilePage({ userId, navigate }) {
   const handleIssueClick = (issueId) => {
     navigate("ShowIssue", { issueId });
   };
+    
+  const handleAssignedSortChange = (field, direction) => {
+  setAssignedSort({ field, direction });
+  console.log(assignedSort);
+  };
+
+  const handleWatchedSortChange = (field, direction) => {
+    setWatchedSort({ field, direction });
+  };
 
   return (
     <div className="flex bg-white min-h-screen">
+      
       {/* Sidebar */}
       <div className="w-1/5 bg-white p-6 shadow-md">
         <div className="flex flex-col items-center">
@@ -97,19 +114,43 @@ export default function UserProfilePage({ userId, navigate }) {
           <p className="text-lg text-gray-600 text-center">
             {user.bio || ""}
           </p>
-          <div className="mt-4 flex justify-center">
-            <button
-              className="bg-[#83eede] text-gray-700 my-6 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
-              onClick={() => navigate("EditProfile", { userId })}
-            >
-              EDIT BIO
-            </button>
-          </div>
+          {String(userId) === String(currentUserId) && (
+            <div className="mt-4 flex justify-center">
+              <button
+                className="bg-[#83eede] text-gray-700 my-6 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
+                onClick={() => navigate("EditProfile", { userId })}
+              >
+                EDIT BIO
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Main Content */}
       <div className="w-3/4 p-6">
+        <div className="mb-4">
+          <button
+            className="flex items-center text-gray-600 hover:text-[#008aa8] transition-colors"
+            onClick={() => navigate("UsersIndex")}
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5 mr-2" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+              />
+            </svg>
+            Back to Users Directory
+          </button>
+        </div>
         {/* Tabs */}
         <div className="flex border-b border-t border-gray-200 mb-4">
           <button
@@ -142,13 +183,21 @@ export default function UserProfilePage({ userId, navigate }) {
         <div>
           {activeTab === "assignedIssues" && (
             <div>
-              <IssueList issues={assignedIssues} onIssueClick={handleIssueClick} />
+              <IssueList issues={assignedIssues} onIssueClick={handleIssueClick}
+              onSortChange={handleAssignedSortChange}
+              sortField={assignedSort.field}
+              sortDirection={assignedSort.direction} 
+              />
             </div>
           )}
 
           {activeTab === "watchedIssues" && (
             <div>
-              <IssueList issues={watchedIssues} onIssueClick={handleIssueClick} />
+              <IssueList issues={watchedIssues} onIssueClick={handleIssueClick}
+              onSortChange={handleWatchedSortChange}
+              sortField={watchedSort.field}
+              sortDirection={watchedSort.direction} 
+              />
             </div>
           )}
 

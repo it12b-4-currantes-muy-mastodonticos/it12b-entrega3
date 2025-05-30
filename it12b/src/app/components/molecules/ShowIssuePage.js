@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -17,6 +16,8 @@ import {
   removeWatcherFromIssue,
   deleteAttachment,
   deleteDueDate,
+  getUserById,
+  deleteIssue,
 } from "../../apiCall";
 import { format } from "date-fns";
 import { es, se } from "date-fns/locale";
@@ -32,6 +33,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const [submitting, setSubmitting] = useState(false);
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+
+  const [showDeleteIssueModal, setShowDeleteIssueModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Inline editing
   const [editingField, setEditingField] = useState(null);
@@ -60,10 +64,16 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
   //watchers modal
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAssignToModal, setIsAssignToModal] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
+
+  const [assignedUser, setAssignedUser] = useState(null);
+  const [selectedAssigned, setSelectedAssigned] = useState(null);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+  const openAssignModal = () => setIsAssignToModal(true);
+  const closeAssignModal = () => setIsAssignToModal(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,6 +98,11 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
         const watchersData = await getWatchersByIssueId(issueId);
         setWatchers(watchersData);
+
+        if (issueData.assigned_to_id) {
+          const assignedUserData = await getUserById(issueData.assigned_to_id);
+          setAssignedUser(assignedUserData);
+        }
 
         const [prioritiesData, severitiesData, statusesData, typesData] =
           await Promise.all([
@@ -116,7 +131,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
       fieldValue !== "" &&
       issue?.status_id !== parseInt(fieldValue)
     ) {
-      const newStatus = statuses.find(s => s.id === parseInt(fieldValue));
+      const newStatus = statuses.find((s) => s.id === parseInt(fieldValue));
       if (newStatus && !newStatus.open) {
         setShowDueDateModal(false);
         setShowDeleteConfirm(false);
@@ -166,7 +181,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
   }, [files]);
 
   const isIssueClosed = () => {
-    if(issue.status && !issue.status.open) return true;
+    if (issue.status && !issue.status.open) return true;
     else return false;
   };
 
@@ -224,32 +239,49 @@ export default function ShowIssuePage({ issueId, navigate }) {
   };
 
   const confirmDeleteDueDate = async () => {
-  setSavingField(true);
-  try {
-    
-    await deleteDueDate(issueId);
-    
-    // Actualizar el estado local
-    setIssue(prevIssue => ({
-      ...prevIssue,
-      due_date: null,
-      due_date_reason: null
-    }));
-    
-    setDueDateValue("");
-    setDueDateReasonValue("");
-    setShowDueDateModal(false);
-    setShowDeleteConfirm(false);
-  } catch (e) {
-    console.error("Error deleting the due date:", e);
-    alert("Error deleting the due date");
-  } finally {
-    setSavingField(false);
-  }
-};
+    setSavingField(true);
+    try {
+      await deleteDueDate(issueId);
+
+      // Actualizar el estado local
+      setIssue((prevIssue) => ({
+        ...prevIssue,
+        due_date: null,
+        due_date_reason: null,
+      }));
+
+      setDueDateValue("");
+      setDueDateReasonValue("");
+      setShowDueDateModal(false);
+      setShowDeleteConfirm(false);
+    } catch (e) {
+      console.error("Error deleting the due date:", e);
+      alert("Error deleting the due date");
+    } finally {
+      setSavingField(false);
+    }
+  };
+
+  const handleDeleteIssue = async () => {
+    try {
+      setIsDeleting(true);
+      await deleteIssue(issueId);
+      // Navigate back to issues list after successful deletion
+      navigate("IndexIssues");
+    } catch (error) {
+      console.error("Error deleting issue:", error);
+      alert("Error deleting issue. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteIssueModal(false);
+    }
+  };
 
   const handleFieldChange = (e) => {
     setFieldValue(e.target.value);
+      if (editingField === "title" && e.target.value.trim() !== "") {
+        return;
+      }
   };
 
   const handleFileChange = (e) => {
@@ -262,40 +294,44 @@ export default function ShowIssuePage({ issueId, navigate }) {
     fileInputRef.current?.click();
   };
 
-  const saveField = async (field) => {
+  const saveField = async (field, value = null) => {
     if (!issue) return;
     setSavingField(true);
+
+      if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
+        return;
+      }
 
     try {
       let updated = { ...issue };
 
       switch (field) {
         case "title":
-          updated.title = fieldValue;
+          updated.title = value ?? fieldValue;
           break;
         case "description":
-          updated.description = { body: fieldValue };
+          updated.description = { body: value ?? fieldValue };
           break;
         case "status_id":
-          updated.status_id = parseInt(fieldValue);
+          updated.status_id = parseInt(value ?? fieldValue);
           break;
         case "issue_type_id":
-          updated.issue_type_id = parseInt(fieldValue);
+          updated.issue_type_id = parseInt(value ?? fieldValue);
           break;
         case "priority_id":
-          updated.priority_id = parseInt(fieldValue);
+          updated.priority_id = parseInt(value ?? fieldValue);
           break;
         case "severity_id":
-          updated.severity_id = parseInt(fieldValue);
+          updated.severity_id = parseInt(value ?? fieldValue);
           break;
         case "assigned_to_id":
-          updated.assigned_to_id = fieldValue ? parseInt(fieldValue) : null;
+          updated.assigned_to_id = value !== null ? parseInt(value) : null;
           break;
         case "due_date":
-          updated.due_date = fieldValue;
+          updated.due_date = value ?? fieldValue;
           break;
         case "due_date_reason":
-          updated.due_date_reason = fieldValue;
+          updated.due_date_reason = value ?? fieldValue;
           break;
         default:
           break;
@@ -362,12 +398,18 @@ export default function ShowIssuePage({ issueId, navigate }) {
   };
 
   const handleFieldBlur = (field) => {
+    if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
+      return;
+    }
     saveField(field);
   };
 
   const handleFieldKeyDown = (e, field) => {
     if (e.key === "Enter") {
       e.preventDefault();
+        if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
+          return;
+        }
       saveField(field);
     } else if (e.key === "Escape") {
       setEditingField(null);
@@ -421,6 +463,21 @@ export default function ShowIssuePage({ issueId, navigate }) {
     }
   };
 
+  const handleAssignToggle = async () => {
+    if (!currentUser) {
+      alert("Debes estar logueado para observar esta issue.");
+      return;
+    }
+
+    try {
+      await saveField("assigned_to_id", currentUser.id);
+      const assignedUser = await getUserById(currentUser.id);
+      setAssignedUser(assignedUser);
+    } catch (error) {
+      console.error("Error al cambiar el estado de watcher:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -447,14 +504,11 @@ export default function ShowIssuePage({ issueId, navigate }) {
     );
   }
 
-  const assignedUser = users.find((user) => user.id === issue.assigned_to_id);
   const creatorUser = users.find((user) => user.id === issue.user_id);
-  const hasDescription = issue.description?.body;
 
   return (
     <div className="issuepage-root">
       <div className="issuepage-wrapper">
-        {/* HEADER */}
         <div className="issuepage-header">
           <a
             href="#"
@@ -475,24 +529,26 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   onKeyDown={(e) => handleFieldKeyDown(e, "title")}
                   className="issuepage-title"
                   disabled={savingField}
+                  required
                 />
               ) : (
                 <h1
                   className="issuepage-title"
                   onClick={() => handleFieldClick("title", issue.title)}
-                  title="Haz click para editar"
+                  title="Click to edit"
                 >
                   <span className="issuepage-id">#{issue.id}</span>
                   {issue.title}
                   {savingField && editingField === null && (
                     <span className="ml-2 text-xs text-gray-400">
-                      Guardando...
+                      Saving...
                     </span>
                   )}
                 </h1>
               )}
             </span>
           </div>
+          
           <span className="issuepage-type">ISSUE</span>
 
           <div className="issuepage-meta">
@@ -537,7 +593,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 dangerouslySetInnerHTML={{
                   __html:
                     issue.description?.body ||
-                    "<em class='text-gray-500'>Sin descripción</em>",
+                    "<em class='text-gray-500'>No description</em>",
                 }}
               />
             )}
@@ -631,7 +687,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 className="issuepage-comment-submit-button"
                 disabled={submitting}
               >
-                {submitting ? "Enviando..." : "Agregar comentario"}
+                {submitting ? "Sending..." : "Add comment"}
               </button>
             </form>
             <div className="issuepage-comments-list">
@@ -905,21 +961,59 @@ export default function ShowIssuePage({ issueId, navigate }) {
               </div>
             )}
           </div>
-
+          {/* ASSIGNED TO */}
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">ASSIGNED</div>
-            {assignedUser && (
-              <div className="issuepage-sidebar-assigned">
-                <img
-                  src={assignedUser.avatar_url}
-                  className="issuepage-sidebar-avatar"
-                />
-                <span>{assignedUser.name}</span>
-              </div>
-            )}
+            <div className="issuepage-sidebar-watchers">
+              {assignedUser ? (
+                <div
+                  key={assignedUser.id}
+                  className="issuepage-sidebar-watcher hover:text-[#008aa8] relative group flex items-center gap-2"
+                >
+                  {assignedUser?.avatar_url && (
+                    <img
+                      src={assignedUser.avatar_url}
+                      alt={assignedUser.name}
+                      className="issuepage-sidebar-avatar"
+                    />
+                  )}
+                  <span>{assignedUser?.name || "Unknown User"}</span>
+                  <button
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2 text-[#62626e] hidden group-hover:flex items-center justify-center w-6 h-6 text-white rounded-full hover:text-red-600"
+                    onClick={async () => {
+                      try {
+                        await saveField("assigned_to_id", null);
+
+                        const assignedUser = null;
+                        setAssignedUser(assignedUser);
+                      } catch (error) {
+                        console.error(
+                          "Error removing myself from assigned:",
+                          error
+                        );
+                      }
+                    }}
+                  >
+                    ✖
+                  </button>
+                </div>
+              ) : (
+                <p className="text-gray-500"></p>
+              )}
+            </div>
             <div className="issuepage-sidebar-buttons">
-              <button className="issuepage-sidebar-btn">+ Add assigned</button>
-              <button className="issuepage-sidebar-btn">Assign to me</button>
+              <button
+                className="issuepage-sidebar-btn text-gray-500"
+                onClick={openAssignModal}
+              >
+                + Add assigned
+              </button>
+              <button
+                className="issuepage-sidebar-btn text-gray-500"
+                onClick={handleAssignToggle}
+              >
+                {"Assign to me"}
+              </button>
             </div>
           </div>
           <div className="issuepage-sidebar-section">
@@ -998,8 +1092,10 @@ export default function ShowIssuePage({ issueId, navigate }) {
                       {issue.due_date_reason}
                     </div>
                   )}
-                  <button 
-                    className={`issuepage-sidebar-btn ${isIssueClosed() ? "issuepage-btn-disabled" : ""}`} 
+                  <button
+                    className={`issuepage-sidebar-btn ${
+                      isIssueClosed() ? "issuepage-btn-disabled" : ""
+                    }`}
                     onClick={handleOpenDueDateModal}
                     disabled={isIssueClosed()}
                   >
@@ -1030,6 +1126,26 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 Set due date
               </button>
             )}
+          </div>
+          <div className="issuepage-sidebar-section">
+            <div className="issuepage-sidebar-label"></div>
+            <button
+              onClick={() => setShowDeleteIssueModal(true)}
+              className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 mt-2"
+              title="Delete this issue permanently"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" className="inline-block">
+                <path
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Delete Issue
+            </button>
           </div>
         </aside>
       </div>
@@ -1215,6 +1331,99 @@ export default function ShowIssuePage({ issueId, navigate }) {
                     closeModal();
                   } catch (error) {
                     console.error("Error adding watchers:", error);
+                  }
+                }}
+              >
+                ADD
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Issue Confirmation Modal */}
+      {showDeleteIssueModal && (
+        <div className="issuepage-delete-confirm-overlay">
+          <div className="issuepage-delete-confirm">
+            <div className="issuepage-delete-confirm-header">
+              <h3>Delete Issue</h3>
+            </div>
+            <div className="issuepage-delete-confirm-content">
+              <p>Are you sure you want to delete this issue?</p>
+              <p className="text-red-500 font-medium mt-2">This action cannot be undone.</p>
+            </div>
+            <div className="issuepage-delete-confirm-actions">
+              <button
+                className="issuepage-delete-confirm-cancel"
+                onClick={() => setShowDeleteIssueModal(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="issuepage-delete-confirm-confirm bg-red-500 text-white"
+                onClick={handleDeleteIssue}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete Issue"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAssignToModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            {/* Botón para cerrar el modal */}
+            <button
+              className="absolute top-10 right-10 bg-gray-100 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-400"
+              onClick={closeAssignModal}
+              title="Close"
+            >
+              ✖
+            </button>
+
+            <h2 className="text-lg font-bold mb-4 text-gray-500 text-center">
+              Add Assign to Issue
+            </h2>
+
+            <div className="modal-users-list text-gray-500">
+              {users.map((user) => {
+                const isAssigned = selectedAssigned === user.id;
+                return (
+                  <div
+                    key={user.id}
+                    className={`modal-user-item flex items-center gap-2 p-2 rounded-md cursor-pointer ${
+                      isAssigned ? "bg-emerald-100" : "hover:bg-gray-100"
+                    }`}
+                    onClick={() => setSelectedAssigned(user.id)}
+                  >
+                    <img
+                      src={user.avatar_url}
+                      alt={user.name}
+                      className="modal-user-avatar"
+                    />
+                    <span>{user.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="modal-actions mt-4 flex justify-center">
+              <button
+                className="bg-[#83eede] text-gray-700 px-4 py-2 rounded-md hover:bg-[#008aa8] hover:text-white transition-colors duration-300"
+                onClick={async () => {
+                  if (!selectedAssigned) return;
+
+                  try {
+                    await saveField("assigned_to_id", selectedAssigned);
+
+                    const assignedUser = await getUserById(selectedAssigned);
+                    setAssignedUser(assignedUser);
+                    closeAssignModal();
+                  } catch (error) {
+                    console.error("Error assigning user:", error);
                   }
                 }}
               >

@@ -8,25 +8,25 @@ export default function BulkInsertModal({ onClose, onSubmit }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Dividir el texto en líneas y filtrar líneas vacías
+    // Split text into lines and filter empty lines
     const issues = issueText
       .split('\n')
       .map(line => line.trim())
       .filter(line => line.length > 0);
     
     if (issues.length === 0) {
-      alert('Por favor, introduce al menos un título de issue.');
+      alert('Please enter at least one issue title.');
       return;
     }
     
-    // Llamar a la función de envío con la lista de títulos
+    // Call the submission function with the list of titles
     onSubmit(issues);
   };
   
   return (
     <div className="bg-white rounded-lg p-6 max-w-xl w-full max-h-[80vh] overflow-y-auto">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-gray-900">Crear múltiples issues</h3>
+        <h3 className="text-lg font-medium text-gray-900">Create Multiple Issues</h3>
         <button
           className="text-gray-500 hover:text-gray-700"
           onClick={onClose}
@@ -40,7 +40,7 @@ export default function BulkInsertModal({ onClose, onSubmit }) {
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Ingresa una issue por línea:
+            Enter one issue per line:
           </label>
           <textarea
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-64 text-gray-800"
@@ -57,13 +57,13 @@ export default function BulkInsertModal({ onClose, onSubmit }) {
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
             onClick={onClose}
           >
-            Cancelar
+            Cancel
           </button>
           <button
             type="submit"
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            Crear Issues
+            Create Issues
           </button>
         </div>
       </form>

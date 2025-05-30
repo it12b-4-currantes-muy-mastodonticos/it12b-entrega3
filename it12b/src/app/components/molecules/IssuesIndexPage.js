@@ -25,7 +25,13 @@ export default function IssuesIndexPage({ navigate }) {
   const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => {
+  if (typeof localStorage !== "undefined") {
+    const storedUser = localStorage.getItem("currentUser");
+    return storedUser ? JSON.parse(storedUser) : null;
+  }
+  return null;
+});
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     type: [],
@@ -271,7 +277,26 @@ useEffect(() => {
 
   return (
     <div className="container mx-auto px-4 py-8 bg-white">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Issues</h1>
+      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow border border-gray-100">
+  <h1 className="text-3xl font-bold text-gray-900">Issues</h1>
+
+  {currentUser && (
+    <div className="flex items-center gap-2">
+      {currentUser.avatar_url ? (
+        <img
+          src={currentUser.avatar_url}
+          alt={currentUser.name}
+          className="w-8 h-8 rounded-full"
+        />
+      ) : (
+        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs">
+          {currentUser.name?.charAt(0) || "?"}
+        </div>
+      )}
+      <span className="text-gray-900 font-medium">{currentUser.name}</span>
+    </div>
+  )}
+</div>
 
       {/* Search bar and buttons */}
       <div className="mb-6 bg-white p-4 rounded-lg shadow border border-gray-100">
@@ -299,12 +324,41 @@ useEffect(() => {
             Create Multiple Issues
           </button>
 
+          {currentUser ? (
+            <button
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+              onClick={() => {
+                setCurrentUser(null);
+                localStorage.removeItem("currentUser");
+                localStorage.removeItem("currentUserId");
+                localStorage.removeItem("user_id");
+                console.log("User logged out: ", localStorage);
+              }}
+            >
+              Log Out
+            </button>
+          ) : (
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              onClick={() => setShowLoginModal(true)}
+            >
+              Log In
+            </button>
+          )}
+
           <button
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-            onClick={() => setShowLoginModal(true)}
+            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
+            onClick={() => navigate("UsersIndex")}
+            title="Users Directory"
           >
-            Log In
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Users Directory
+            </div>
           </button>
+
           <button
             className={`flex items-center gap-2 px-4 py-2 rounded-md ${
               showFilters
@@ -705,33 +759,6 @@ useEffect(() => {
           localStorage.setItem("currentUser", JSON.stringify(user));
         }}
       />
-
-      {/* Optional: Show current user */}
-      {currentUser && (
-        <div className="fixed bottom-4 right-4 bg-white p-3 rounded-lg shadow-md flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden">
-            {currentUser.avatar && (
-              <img
-                src={currentUser.avatar_url}
-                alt={currentUser.name}
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          <div>
-            <div className="font-medium text-gray-900">{currentUser.name}</div>
-            <button
-              className="text-red-600 text-sm hover:text-red-800 font-medium"
-              onClick={() => {
-                setCurrentUser(null);
-                localStorage.removeItem("currentUser");
-              }}
-            >
-              Log out
-            </button>
-          </div>
-        </div>
-      )}
       {showAssignPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
@@ -758,18 +785,6 @@ useEffect(() => {
                   />
                 </svg>
               </button>
-            </div>
-
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Search user..."
-                className="w-full px-4 py-2 border rounded-md text-gray-800"
-                onChange={(e) => {
-                  // Here you could implement a local user search
-                  // For simplicity, we won't implement it now
-                }}
-              />
             </div>
 
             <div className="space-y-2 max-h-64 overflow-y-auto">
