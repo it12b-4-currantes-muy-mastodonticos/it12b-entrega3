@@ -26,9 +26,12 @@ export default function IssuesIndexPage({ navigate }) {
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(() => {
+  if (typeof localStorage !== "undefined") {
     const storedUser = localStorage.getItem("currentUser");
     return storedUser ? JSON.parse(storedUser) : null;
-  });
+  }
+  return null;
+});
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     type: [],
