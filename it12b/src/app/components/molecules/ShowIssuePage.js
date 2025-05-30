@@ -352,7 +352,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
       const updatedIssue = await updateIssue(issueId, { issue: payload });
       setIssue(updatedIssue);
     } catch (e) {
-      alert("Error guardando el campo");
+      console.error("Error guardando el campo");
     } finally {
       setEditingField(null);
       setSavingField(false);
@@ -783,7 +783,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
         {/* SIDEBAR */}
         <aside className="issuepage-sidebar">
-          {editingField === "status_id" ? (
+          {(editingField === "status_id"  && currentUser) ? (
             <>
               <button
                 type="button"
@@ -852,7 +852,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
           {/* TYPE */}
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">type</div>
-            {editingField === "issue_type_id" ? (
+            {(editingField === "issue_type_id"  && currentUser)? (
               <>
                 <button
                   type="button"
@@ -908,7 +908,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
           {/* SEVERITY */}
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">severity</div>
-            {editingField === "severity_id" ? (
+            {(editingField === "severity_id" &&  currentUser) ? (
               <>
                 <button
                   type="button"
@@ -963,7 +963,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
           {/* PRIORITY */}
           <div className="issuepage-sidebar-section">
             <div className="issuepage-sidebar-label">priority</div>
-            {editingField === "priority_id" ? (
+            {(editingField === "priority_id"  && currentUser) ? (
               <>
                 <button
                   type="button"
