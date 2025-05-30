@@ -7,6 +7,7 @@ import NewIssuePage from "../components/molecules/NewIssuePage";
 import AdminSettingsPage from "../components/molecules/AdminSettingsPage";
 import UserProfilePage from "../components/molecules/UserProfilePage";
 import EditProfilePage from "../components/molecules/EditProfilePage";
+import UsersIndexPage from "../components/molecules/UserIndexPage";
 
 export default function AppNavigator() {
   const [currentScreen, setCurrentScreen] = useState("");
@@ -31,6 +32,8 @@ export default function AppNavigator() {
         return <NewIssuePage navigate={navigate} />;
       case "AdminSettings":
         return <AdminSettingsPage navigate={navigate} />;
+      case "UsersIndex": // Añade este caso
+        return <UsersIndexPage navigate={navigate} />;
       case "UserProfile":
         return <UserProfilePage userId={screenParams.userId} navigate={navigate} />;
       case "EditProfile":

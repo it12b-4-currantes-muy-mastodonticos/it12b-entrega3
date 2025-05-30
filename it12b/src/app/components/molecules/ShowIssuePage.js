@@ -250,6 +250,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
 
   const handleFieldChange = (e) => {
     setFieldValue(e.target.value);
+      if (editingField === "title" && e.target.value.trim() !== "") {
+        return;
+      }
   };
 
   const handleFileChange = (e) => {
@@ -265,6 +268,10 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const saveField = async (field) => {
     if (!issue) return;
     setSavingField(true);
+
+      if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
+        return;
+      }
 
     try {
       let updated = { ...issue };
@@ -362,12 +369,18 @@ export default function ShowIssuePage({ issueId, navigate }) {
   };
 
   const handleFieldBlur = (field) => {
+    if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
+      return;
+    }
     saveField(field);
   };
 
   const handleFieldKeyDown = (e, field) => {
     if (e.key === "Enter") {
       e.preventDefault();
+        if (field === "title" && (!fieldValue || fieldValue.trim() === "")) {
+          return;
+        }
       saveField(field);
     } else if (e.key === "Escape") {
       setEditingField(null);
@@ -475,6 +488,7 @@ export default function ShowIssuePage({ issueId, navigate }) {
                   onKeyDown={(e) => handleFieldKeyDown(e, "title")}
                   className="issuepage-title"
                   disabled={savingField}
+                  required
                 />
               ) : (
                 <h1
