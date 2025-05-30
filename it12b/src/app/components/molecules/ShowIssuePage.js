@@ -671,26 +671,28 @@ export default function ShowIssuePage({ issueId, navigate }) {
                       {(a.byte_size / 1024).toFixed(1)} KB
                     </td>
                     <td>
-                      <button
-                        className="issuepage-attachment-delete"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          deleteAttachments(a.id);
-                        }}
-                        disabled={savingField}
-                      >
-                        <svg viewBox="0 0 24 24" width="16" height="16">
-                          <path
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            fill="none"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
+                      {currentUser ? (
+                        <button
+                          className="issuepage-attachment-delete"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            deleteAttachments(a.id);
+                          }}
+                          disabled={savingField}
+                        >
+                          <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      ) : null}
                     </td>
                   </tr>
                 ))}
@@ -1031,24 +1033,26 @@ export default function ShowIssuePage({ issueId, navigate }) {
                     />
                   )}
                   <span>{assignedUser?.name || "Unknown User"}</span>
-                  {currentUser && (<button
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2 text-[#62626e] hidden group-hover:flex items-center justify-center w-6 h-6 text-white rounded-full hover:text-red-600"
-                    onClick={async () => {
-                      try {
-                        await saveField("assigned_to_id", null);
+                  {currentUser && (
+                    <button
+                      className="absolute right-0 top-1/2 transform -translate-y-1/2 text-[#62626e] hidden group-hover:flex items-center justify-center w-6 h-6 text-white rounded-full hover:text-red-600"
+                      onClick={async () => {
+                        try {
+                          await saveField("assigned_to_id", null);
 
-                        const assignedUser = null;
-                        setAssignedUser(assignedUser);
-                      } catch (error) {
-                        console.error(
-                          "Error removing myself from assigned:",
-                          error
-                        );
-                      }
-                    }}
-                  >
-                    ✖
-                  </button>)}
+                          const assignedUser = null;
+                          setAssignedUser(assignedUser);
+                        } catch (error) {
+                          console.error(
+                            "Error removing myself from assigned:",
+                            error
+                          );
+                        }
+                      }}
+                    >
+                      ✖
+                    </button>
+                  )}
                 </div>
               ) : (
                 <p className="text-gray-500"></p>
@@ -1094,22 +1098,26 @@ export default function ShowIssuePage({ issueId, navigate }) {
                         />
                       )}
                       <span>{watcher?.name || "Unknown User"}</span>
-                      {currentUser && (<button
-                        className="absolute right-0 top-1/2 transform -translate-y-1/2 text-[#62626e] hidden group-hover:flex items-center justify-center w-6 h-6 text-white rounded-full hover:text-red-600"
-                        onClick={async () => {
-                          try {
-                            await removeWatcherFromIssue(issueId, watcherId.id);
-                            const updatedWatchers = await getWatchersByIssueId(
-                              issueId
-                            );
-                            setWatchers(updatedWatchers);
-                          } catch (error) {
-                            console.error("Error removing watcher:", error);
-                          }
-                        }}
-                      >
-                        ✖
-                      </button>)}
+                      {currentUser && (
+                        <button
+                          className="absolute right-0 top-1/2 transform -translate-y-1/2 text-[#62626e] hidden group-hover:flex items-center justify-center w-6 h-6 text-white rounded-full hover:text-red-600"
+                          onClick={async () => {
+                            try {
+                              await removeWatcherFromIssue(
+                                issueId,
+                                watcherId.id
+                              );
+                              const updatedWatchers =
+                                await getWatchersByIssueId(issueId);
+                              setWatchers(updatedWatchers);
+                            } catch (error) {
+                              console.error("Error removing watcher:", error);
+                            }
+                          }}
+                        >
+                          ✖
+                        </button>
+                      )}
                     </div>
                   );
                 })
@@ -1149,30 +1157,63 @@ export default function ShowIssuePage({ issueId, navigate }) {
                       {issue.due_date_reason}
                     </div>
                   )}
-                  {currentUser && (<button
-                    className={`issuepage-sidebar-btn ${
-                      isIssueClosed() ? "issuepage-btn-disabled" : ""
-                    }`}
-                    onClick={handleOpenDueDateModal}
-                    disabled={isIssueClosed()}
-                  >
-                    Edit due date
-                  </button>)}
+                  {currentUser && (
+                    <button
+                      className={`issuepage-sidebar-btn ${
+                        isIssueClosed() ? "issuepage-btn-disabled" : ""
+                      }`}
+                      onClick={handleOpenDueDateModal}
+                      disabled={isIssueClosed()}
+                    >
+                      Edit due date
+                    </button>
+                  )}
                 </div>
               </>
             ) : (
-              <>{currentUser && (<button
-                className="issuepage-sidebar-btn"
-                onClick={handleOpenDueDateModal}
+              <>
+                {currentUser && (
+                  <button
+                    className="issuepage-sidebar-btn"
+                    onClick={handleOpenDueDateModal}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="calendar-icon"
+                      width="18"
+                      height="18"
+                    >
+                      <path
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Set due date
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+          <div className="issuepage-sidebar-section">
+            <div className="issuepage-sidebar-label"></div>
+            {currentUser && (
+              <button
+                onClick={() => setShowDeleteIssueModal(true)}
+                className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 mt-2"
+                title="Delete this issue permanently"
               >
                 <svg
                   viewBox="0 0 24 24"
-                  className="calendar-icon"
-                  width="18"
-                  height="18"
+                  width="16"
+                  height="16"
+                  className="inline-block"
                 >
                   <path
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                     stroke="currentColor"
                     strokeWidth="2"
                     fill="none"
@@ -1180,35 +1221,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
                     strokeLinejoin="round"
                   />
                 </svg>
-                Set due date
-              </button>)}
-              </>
+                Delete Issue
+              </button>
             )}
-          </div>
-          <div className="issuepage-sidebar-section">
-            <div className="issuepage-sidebar-label"></div>
-            {currentUser && (<button
-              onClick={() => setShowDeleteIssueModal(true)}
-              className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 mt-2"
-              title="Delete this issue permanently"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                width="16"
-                height="16"
-                className="inline-block"
-              >
-                <path
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Delete Issue
-            </button>)}
           </div>
         </aside>
       </div>
