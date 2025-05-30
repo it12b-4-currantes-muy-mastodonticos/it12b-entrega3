@@ -17,6 +17,7 @@ import {
   deleteAttachment,
   deleteDueDate,
   getUserById,
+  deleteIssue,
 } from "../../apiCall";
 import { format } from "date-fns";
 import { es, se } from "date-fns/locale";
@@ -32,6 +33,9 @@ export default function ShowIssuePage({ issueId, navigate }) {
   const [submitting, setSubmitting] = useState(false);
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+
+  const [showDeleteIssueModal, setShowDeleteIssueModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Inline editing
   const [editingField, setEditingField] = useState(null);
@@ -255,6 +259,21 @@ export default function ShowIssuePage({ issueId, navigate }) {
       alert("Error deleting the due date");
     } finally {
       setSavingField(false);
+    }
+  };
+
+  const handleDeleteIssue = async () => {
+    try {
+      setIsDeleting(true);
+      await deleteIssue(issueId);
+      // Navigate back to issues list after successful deletion
+      navigate("IndexIssues");
+    } catch (error) {
+      console.error("Error deleting issue:", error);
+      alert("Error deleting issue. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteIssueModal(false);
     }
   };
 
@@ -490,7 +509,6 @@ export default function ShowIssuePage({ issueId, navigate }) {
   return (
     <div className="issuepage-root">
       <div className="issuepage-wrapper">
-        {/* HEADER */}
         <div className="issuepage-header">
           <a
             href="#"
@@ -517,19 +535,20 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 <h1
                   className="issuepage-title"
                   onClick={() => handleFieldClick("title", issue.title)}
-                  title="Haz click para editar"
+                  title="Click to edit"
                 >
                   <span className="issuepage-id">#{issue.id}</span>
                   {issue.title}
                   {savingField && editingField === null && (
                     <span className="ml-2 text-xs text-gray-400">
-                      Guardando...
+                      Saving...
                     </span>
                   )}
                 </h1>
               )}
             </span>
           </div>
+          
           <span className="issuepage-type">ISSUE</span>
 
           <div className="issuepage-meta">
@@ -1108,6 +1127,26 @@ export default function ShowIssuePage({ issueId, navigate }) {
               </button>
             )}
           </div>
+          <div className="issuepage-sidebar-section">
+            <div className="issuepage-sidebar-label"></div>
+            <button
+              onClick={() => setShowDeleteIssueModal(true)}
+              className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 mt-2"
+              title="Delete this issue permanently"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" className="inline-block">
+                <path
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Delete Issue
+            </button>
+          </div>
         </aside>
       </div>
 
@@ -1296,6 +1335,37 @@ export default function ShowIssuePage({ issueId, navigate }) {
                 }}
               >
                 ADD
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Issue Confirmation Modal */}
+      {showDeleteIssueModal && (
+        <div className="issuepage-delete-confirm-overlay">
+          <div className="issuepage-delete-confirm">
+            <div className="issuepage-delete-confirm-header">
+              <h3>Delete Issue</h3>
+            </div>
+            <div className="issuepage-delete-confirm-content">
+              <p>Are you sure you want to delete this issue?</p>
+              <p className="text-red-500 font-medium mt-2">This action cannot be undone.</p>
+            </div>
+            <div className="issuepage-delete-confirm-actions">
+              <button
+                className="issuepage-delete-confirm-cancel"
+                onClick={() => setShowDeleteIssueModal(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="issuepage-delete-confirm-confirm bg-red-500 text-white"
+                onClick={handleDeleteIssue}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete Issue"}
               </button>
             </div>
           </div>
