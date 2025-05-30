@@ -726,6 +726,7 @@ useEffect(() => {
                           Unassigned
                         </span>
                       )}
+                      {currentUser ? (
                       <button
                         className="ml-2 p-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
                         onClick={(e) => {
@@ -749,6 +750,7 @@ useEffect(() => {
                           />
                         </svg>
                       </button>
+                      ) : ([])}
                     </div>
                   </td>
                 </tr>
