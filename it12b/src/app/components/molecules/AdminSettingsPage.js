@@ -5,7 +5,8 @@ import {
   getTypes, createType, updateType, deleteType,
   getSeverities, createSeverity, updateSeverity, deleteSeverity,
   getPriorities, createPriority, updatePriority, deletePriority,
-  getStatuses, createStatus, updateStatus, deleteStatus
+  getStatuses, createStatus, updateStatus, deleteStatus,
+  getUsers
 } from "../../apiCall";
 
 export default function AdminSettingsPage({ navigate }) {
@@ -47,13 +48,11 @@ export default function AdminSettingsPage({ navigate }) {
   // Load data on start
   useEffect(() => {
 
-    const userId = localStorage.getItem("currentUserId") || localStorage.getItem("user_id");
-    const token = localStorage.getItem("token");
-    
-    if (userId && token) {
-      setUserContext({ userId, token });
-    } else {
-      setUserContext(null);
+    setLoading(true);
+
+    const userId = localStorage.getItem("currentUserId");
+    if (userId) {
+      setUserContext(userId);
     }
 
     const fetchData = async () => {
