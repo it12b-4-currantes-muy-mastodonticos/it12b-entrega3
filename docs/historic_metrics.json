@@ -1648,5 +1648,115 @@
             "done": 0,
             "total": 0
         }
+    },
+    "2025-06-06": {
+        "commits": {
+            "AlejandroComadran": 31,
+            "alexcantarero": 91,
+            "MarkitusHD97": 48,
+            "nataliayikewang": 54,
+            "anonymous": 1,
+            "total": 225
+        },
+        "modified_lines": {
+            "AlejandroComadran": {
+                "additions": 81704,
+                "deletions": 1276,
+                "modified": 82980
+            },
+            "alexcantarero": {
+                "additions": 35399,
+                "deletions": 1543,
+                "modified": 36942
+            },
+            "MarkitusHD97": {
+                "additions": 16194,
+                "deletions": 498,
+                "modified": 16692
+            },
+            "nataliayikewang": {
+                "additions": 67221,
+                "deletions": 3225,
+                "modified": 70446
+            },
+            "total": {
+                "additions": 200518,
+                "deletions": 6542,
+                "modified": 207060
+            }
+        },
+        "commit_streak": {
+            "AlejandroComadran": 1,
+            "alexcantarero": 2,
+            "MarkitusHD97": 1,
+            "nataliayikewang": 2
+        },
+        "commit_merges": 40,
+        "longest_commit_streak_per_user": {
+            "AlejandroComadran": 1,
+            "alexcantarero": 2,
+            "MarkitusHD97": 1,
+            "nataliayikewang": 2
+        },
+        "issues": {
+            "assigned": {
+                "AlejandroComadran": 0,
+                "alexcantarero": 0,
+                "MarkitusHD97": 0,
+                "nataliayikewang": 0,
+                "non_assigned": 0
+            },
+            "closed": {
+                "AlejandroComadran": 0,
+                "alexcantarero": 0,
+                "MarkitusHD97": 0,
+                "nataliayikewang": 0
+            },
+            "have_pull_request": 0,
+            "assignee_is_pr_author": 0,
+            "total_closed": 0,
+            "total": 0
+        },
+        "pull_requests": {
+            "created": {
+                "AlejandroComadran": 3,
+                "alexcantarero": 4,
+                "MarkitusHD97": 0,
+                "nataliayikewang": 2
+            },
+            "merged_per_member": {
+                "AlejandroComadran": 3,
+                "alexcantarero": 3,
+                "MarkitusHD97": 1,
+                "nataliayikewang": 0
+            },
+            "merged": 7,
+            "not_merged_by_author": 3,
+            "closed": 2,
+            "total": 9
+        },
+        "project": {
+            "assigned_per_member": {
+                "AlejandroComadran": 0,
+                "alexcantarero": 0,
+                "MarkitusHD97": 0,
+                "nataliayikewang": 0
+            },
+            "in_progress_per_member": {
+                "AlejandroComadran": 0,
+                "alexcantarero": 0,
+                "MarkitusHD97": 0,
+                "nataliayikewang": 0
+            },
+            "done_per_member": {
+                "AlejandroComadran": 0,
+                "alexcantarero": 0,
+                "MarkitusHD97": 0,
+                "nataliayikewang": 0
+            },
+            "in_progress": 0,
+            "done": 0,
+            "total": 0
+        }
     }
 }
